@@ -1,0 +1,21 @@
+name: inversion
+
+python_env: python_env.yaml
+
+entry_points:
+  main:
+    parameters:
+      gpu: {type: string, default: 0}
+      model: {type: string, default: 'vgg16'}
+      saved_name: {type: string, default: '/workspace/vgg.pth'}
+      temp: {type: int, default: 64}
+      num_class: {type: int, default: 1000}
+      attack_type: {type: string, default: 'gmi'}
+
+    command: |
+          python attack_models.py \
+            --device {gpu} \
+            --model {model} \
+            --path {saved_name} \
+            --num_class {num_class}\
+            --attack_type {attack_type}
