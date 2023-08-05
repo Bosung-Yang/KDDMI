@@ -1,0 +1,28 @@
+name: vgg_training
+
+python_env: python_env.yaml
+
+entry_points:
+  main:
+    parameters:
+      gpu: {type: string, default: 0}
+      epoch: {type: int, default: 100}
+      model: {type: string, default: 'vgg16'}
+      teacher: {type: string, default: 'vgg16'}
+      teacher_path: {type: string, default: './vgg16.pth'}
+      save_name: {type: string, default: './lastest.pth'}
+      temp: {type: int, default: 64}
+      num_class: {type: int, default: 1000}
+      seed: {type: int, default: 1}
+
+    command: |
+          python train_vgg.py \
+            --gpu {gpu} \
+            --epoch {epoch} \
+            --student {model} \
+            --teacher {teacher} \
+            --teacher_path {teacher_path} \
+            --save_name {save_name} \
+            --temp {temp} \
+            --num_class {num_class}\
+            --seed {seed}
