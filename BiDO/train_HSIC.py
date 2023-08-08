@@ -53,7 +53,7 @@ def main(args, loaded_args, trainloader, testloader):
     milestones = loaded_args[model_name]["adjust_epochs"]
 
     hp_list = [
-        (0, 0)
+        (0.1, 0.5)
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
