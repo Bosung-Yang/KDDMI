@@ -26,16 +26,14 @@ def main(args, loaded_args, trainloader, testloader):
             net = model.SCNN(10)
 
     elif args.dataset == 'celeba':
-        lr = 1e-2
+        lr = 1e-3
         n_epochs = 50
         if model_name == "VGG16":
-            net = model.VGG16(n_classes)
+            net = model.IR50(n_classes)
 
-    optimizer = torch.optim.SGD(params=net.parameters(),
+    optimizer = torch.optim.Adam(params=net.parameters(),
                                 lr=lr,
-                                momentum=momentum,
                                 weight_decay=weight_decay,
-                                nesterov=True
                                 )
 
     scheduler = MultiStepLR(optimizer, milestones, gamma=0.2)
