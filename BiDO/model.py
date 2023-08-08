@@ -370,7 +370,7 @@ class VGG16(nn.Module):
             feature = self.bn(feature)
 
             res = self.fc_layer(feature)
-            res = F.softmax(res,dim=1)
+            #res = F.softmax(res,dim=1)
             return feature, res
 
     def predict(self, x):
