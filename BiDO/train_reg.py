@@ -6,8 +6,8 @@ from util import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
 from copy import deepcopy
 from torchvision import transforms, datasets
 device = "cuda"
-sys.path.append('../VMI/')
-from csv_logger import CSVLogger, plot_csv
+#sys.path.append('../VMI/')
+#from csv_logger import CSVLogger, plot_csv
 
 
 def main(args, loaded_args, trainloader, testloader):
@@ -46,12 +46,8 @@ def main(args, loaded_args, trainloader, testloader):
     ################## viz ######################
     args.output_dir = os.path.join(args.model_dir, args.dataset, args.defense)
     os.makedirs(args.output_dir, exist_ok=True)
-    epoch_fieldnames = ['global_iteration', 'train_loss', 'train_acc', 'test_loss', 'test_acc']
-    epoch_logger = CSVLogger(every=1,
-                             fieldnames=epoch_fieldnames,
-                             filename=os.path.join(
-                                 args.output_dir, f'epoch_log.csv'),
-                             resume=0)
+
+
     ################## viz ######################
     best_acc = -1
     for epoch in range(n_epochs):
@@ -66,16 +62,7 @@ def main(args, loaded_args, trainloader, testloader):
         scheduler.step()
 
         ################################### viz ####################################
-        if epoch % 1 == 0:
-            epoch_logger.writerow({
-                'global_iteration': epoch,
-                'train_loss': train_loss,
-                'train_acc': train_acc,
-                'test_loss': test_loss,
-                'test_acc': test_acc,
-            })
-            plot_csv(epoch_logger.filename, os.path.join(args.output_dir, f'epoch_plots.jpeg'))
-        ################################### viz ####################################
+
 
     print("best acc:", best_acc)
     utils.save_checkpoint({
