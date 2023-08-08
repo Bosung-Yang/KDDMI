@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.optim.lr_scheduler import MultiStepLR
 from util import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
 from copy import deepcopy
-
+from torchvision import transforms, datasets
 device = "cuda"
 sys.path.append('../VMI/')
 from csv_logger import CSVLogger, plot_csv
@@ -100,10 +100,29 @@ if __name__ == '__main__':
     file = os.path.join(args.config_dir, args.dataset + ".json")
     loaded_args = utils.load_json(json_file=file)
 
-    train_file = loaded_args['dataset']['train_file']
-    test_file = loaded_args['dataset']['test_file']
-    trainloader = utils.init_dataloader(loaded_args, train_file, mode="train")
-    testloader = utils.init_dataloader(loaded_args, test_file, mode="test")
+    data_path = '/workspace/data/'
+    batch_size = 64
+    train_folder = 'train/'
+    test_folder = 'test/'
+    image_transforms = {
+        'train': transforms.Compose([
+            transforms.CenterCrop((128,128)),
+            transforms.Resize(64),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
+        ]),
+        'test': transforms.Compose([
+            transforms.CenterCrop((128,128)),
+            transforms.Resize(64),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
+        ])
+    }
+    train_images = datasets.ImageFolder(data_path+train_folder,image_transforms['train'])
+    train_loader = torch.utils.data.DataLoader(train_images, batch_size = 64 ,num_workers=4,shuffle=True)
+    test_images = datasets.ImageFolder(data_path+test_folder,image_transforms['test'])
+    test_loader = torch.utils.data.DataLoader(test_images, batch_size = 64 ,num_workers=4,shuffle=True) 
+ 
 
-    main(args, loaded_args, trainloader, testloader)
+    main(args, loaded_args, train_loader, test_loader)
 
