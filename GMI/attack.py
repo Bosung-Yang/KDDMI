@@ -251,7 +251,37 @@ if __name__ == '__main__':
                     print(f'FID:{fid_value:.4f}')
 
             elif args.defense == 'reg':
-                path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_85.87.tar")
+                path_T = os.path.join(args.model_path, args.dataset, args.defense, "vs2000tovgg.pth")
+                # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
+                T = model.VGG16(num_classes)
+
+                T = nn.DataParallel(T).cuda()
+
+                ckp_T = torch.load(path_T)
+                T.load_state_dict(ckp_T, strict=False)
+                T=T.cuda()
+
+                res_all = []
+                ids = 300
+                times = 5
+                ids_per_time = ids // times
+                iden = torch.from_numpy(np.arange(ids_per_time))
+                for idx in range(times):
+                    print("--------------------- Attack batch [%s]------------------------------" % idx)
+                    res = inversion(args, G, D, T, E, iden, lr=2e-2, iter_times=2000, verbose=True)
+                    res_all.append(res)
+                    iden = iden + ids_per_time
+
+                res = np.array(res_all).mean(0)
+                fid_value = calculate_fid_given_paths(args.dataset,
+                                                      [f'attack_res/{args.dataset}/trainset/',
+                                                       f'attack_res/{args.dataset}/{args.defense}/all/'],
+                                                      50, 1, 2048)
+                print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
+                print(f'FID:{fid_value:.4f}')
+
+            elif args.defense == 'kd':
+                path_T = os.path.join(args.model_path, args.dataset, args.defense, "")
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16(num_classes)
 
