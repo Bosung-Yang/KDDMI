@@ -281,11 +281,11 @@ if __name__ == '__main__':
                 print(f'FID:{fid_value:.4f}')
 
             elif args.defense == 'kd':
-                path_T = os.path.join(args.model_path, args.dataset, args.defense, "")
+                path_T = os.path.join(args.model_path, "vs2000tovgg.pth")
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16(num_classes)
 
-                T = nn.DataParallel(T).cuda()
+                #T = nn.DataParallel(T).cuda()
 
                 checkpoint = torch.load(path_T)
                 ckp_T = torch.load(path_T)
