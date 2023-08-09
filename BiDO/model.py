@@ -384,7 +384,7 @@ class VGG16(nn.Module):
     
 class VGG16_(nn.Module):
     def __init__(self, n_classes):
-        super(VGG16, self).__init__()
+        super(VGG16_, self).__init__()
         model = torchvision.models.vgg16_bn(pretrained=True)
         self.feature = model.features
         self.feat_dim = 512 * 2 * 2

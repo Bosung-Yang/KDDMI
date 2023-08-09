@@ -67,7 +67,7 @@ def distillation(y, labels, teacher_scores, T, alpha):
     # y: student
     # labels: hard label
     # teacher_scores: soft label
-    return nn.KLDivLoss()(F.log_softmax(y/T), F.softmax(teacher_scores/T)) * (T*T * 2.0 + alpha)  + 0.01 * F.cross_entropy(y,labels) * (1.-alpha) + 0.01*nn.MSELoss()(y,teacher_scores)
+    return 0.01 * F.cross_entropy(y,labels) * (1.-alpha) + 0.01*nn.MSELoss()(y,teacher_scores)
     #return nn.MSELoss()(y,teacher_scores)
 
 # Vanilla - None, DCT, Enc
