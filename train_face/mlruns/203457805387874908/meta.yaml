@@ -1,0 +1,6 @@
+artifact_location: file:///workspace/KDDMI/train_face/mlruns/203457805387874908
+creation_time: 1691546676888
+experiment_id: '203457805387874908'
+last_update_time: 1691546676888
+lifecycle_stage: active
+name: resnet_CE

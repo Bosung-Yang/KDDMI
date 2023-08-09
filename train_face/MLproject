@@ -8,11 +8,11 @@ entry_points:
       gpu: {type: string, default: 0}
       epoch: {type: int, default: 100}
       model: {type: string, default: 'vgg16'}
-      teacher: {type: string, default: 'vgg16'}
-      teacher_path: {type: string, default: './vgg16.pth'}
-      save_name: {type: string, default: './lastest.pth'}
+      teacher: {type: string, default: 'vgg_vs'}
+      teacher_path: {type: string, default: '/workspace/data/vgg_2000.pth'}
+      save_name: {type: string, default: '/workspace/data/vs2000tovgg.pth'}
       temp: {type: int, default: 64}
-      num_class: {type: int, default: 1000}
+      num_class: {type: int, default: 2000}
       seed: {type: int, default: 1}
 
     command: |

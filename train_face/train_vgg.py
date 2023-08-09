@@ -102,7 +102,7 @@ if __name__ == '__main__':
     parser = ArgumentParser(description='Step1 : Training Face Classifiers')
     parser.add_argument('--gpu')
     parser.add_argument('--epoch',default=10)
-    parser.add_argument('--mode',default='none')
+    parser.add_argument('--mode',default='kd')
     parser.add_argument('--student',default='vgg16')
     parser.add_argument('--teacher',default='vgg16')
     parser.add_argument('--teacher_path',default='./final_pths/vgg16.pth')
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(device)
     # dataloader
-    data_path = '/workspace/data/data/'
+    data_path = '/workspace/data/'
     batch_size = 64
     train_folder = 'train/'
     test_folder = 'test/'
@@ -148,8 +148,8 @@ if __name__ == '__main__':
     student = student.cuda()
     print('teacher')
     teacher = util.get_model(args.teacher, args.num_class)
-    #teacher.load_state_dict(torch.load(args.teacher_path))
-    
+    teacher.load_state_dict(torch.load(args.teacher_path))
+    teacjer = teacher.cuda()
 
     enc=None
     #optim = torch.optim.Adam(student.parameters(), lr = 0.0001)

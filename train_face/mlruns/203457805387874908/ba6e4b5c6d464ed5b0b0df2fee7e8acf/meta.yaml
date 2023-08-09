@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/train_face/mlruns/203457805387874908/ba6e4b5c6d464ed5b0b0df2fee7e8acf/artifacts
+end_time: 1691546727121
+entry_point_name: ''
+experiment_id: '203457805387874908'
+lifecycle_stage: active
+run_id: ba6e4b5c6d464ed5b0b0df2fee7e8acf
+run_name: bright-ray-720
+run_uuid: ba6e4b5c6d464ed5b0b0df2fee7e8acf
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691546707144
+status: 4
+tags: []
+user_id: root

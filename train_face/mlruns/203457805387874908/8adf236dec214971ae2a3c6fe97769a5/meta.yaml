@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/train_face/mlruns/203457805387874908/8adf236dec214971ae2a3c6fe97769a5/artifacts
+end_time: 1691549893145
+entry_point_name: ''
+experiment_id: '203457805387874908'
+lifecycle_stage: active
+run_id: 8adf236dec214971ae2a3c6fe97769a5
+run_name: legendary-hog-954
+run_uuid: 8adf236dec214971ae2a3c6fe97769a5
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691546773702
+status: 3
+tags: []
+user_id: root
