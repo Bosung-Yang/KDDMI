@@ -283,14 +283,14 @@ if __name__ == '__main__':
             elif args.defense == 'kd':
                 path_T = os.path.join(args.model_path, "vs2000tovgg.pth")
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
-                T = model.VGG16(num_classes)
+                T = model.VGG16(2000)
 
                 #T = nn.DataParallel(T).cuda()
 
                 checkpoint = torch.load(path_T)
                 ckp_T = torch.load(path_T)
-                T.load_state_dict(ckp_T['state_dict'])
-
+                T.load_state_dict(ckp_T)
+                E=T
                 res_all = []
                 ids = 300
                 times = 5
