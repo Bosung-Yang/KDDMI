@@ -468,3 +468,54 @@ def train(model, criterion, optimizer, trainloader):
         pbar.set_description(msg)
 
     return losses.avg, top1.avg
+
+def train_kd(model,teacher, criterion, optimizer, trainloader):
+    model.train()
+    teacher.eval()
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    top1 = AverageMeter()
+    top5 = AverageMeter()
+    loss_cls = AverageMeter()
+    end = time.time()
+
+    pbar = tqdm(enumerate(trainloader), total=len(trainloader), ncols=150)
+
+    for batch_idx, (inputs, iden) in pbar:
+        inputs, iden = inputs.to(device), iden.to(device)
+        #iden = iden.view(-1)
+
+        feats, label = model(inputs)
+        feats, tlabel = teacher(inputs)
+        cross_loss = criterion(iden, label, tlabel, 0,0)
+        # triplet_loss = triplet(feats, iden)
+        loss = cross_loss
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # measure accuracy and record loss
+        bs = inputs.size(0)
+        prec1, prec5 = accuracy(label.data, iden.data, topk=(1, 5))
+        losses.update(loss.item(), bs)
+
+        top1.update(prec1.item(), bs)
+        top5.update(prec5.item(), bs)
+
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        # plot progress
+        msg = '({batch}/{size}) | ' \
+              'Loss:{loss:.4f} | ' \
+              'top1:{top1: .4f} | top5:{top5: .4f}'.format(
+            batch=batch_idx + 1,
+            size=len(trainloader),
+            loss=losses.avg,
+            top1=top1.avg,
+            top5=top5.avg,
+        )
+        pbar.set_description(msg)
+
+    return losses.avg, top1.avg

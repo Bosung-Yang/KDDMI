@@ -58,6 +58,14 @@ def load_feature_extractor(net, state_dict):
         # print(name, '---', new_name)
         net_state[name].copy_(mew_param.data)
 
+def distillation(y, labels, teacher_scores, T, alpha):
+    # distillation loss + classification loss
+    # y: student
+    # labels: hard label
+    # teacher_scores: soft label
+    return  F.cross_entropy(y,labels) + nn.MSELoss()(y,teacher_scores)
+    #return nn.MSELoss()(y,teacher_scores)
+
 def main(args, loaded_args, trainloader, testloader):
     n_classes = loaded_args["dataset"]["n_classes"]
     model_name = loaded_args["dataset"]["model_name"]
@@ -71,7 +79,7 @@ def main(args, loaded_args, trainloader, testloader):
         (0.1, 0.5)
     ]
 
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = distillation
 
 
     if model_name == "VGG16" or model_name == "reg":
@@ -91,12 +99,17 @@ def main(args, loaded_args, trainloader, testloader):
 
     net = torch.nn.DataParallel(net).to(device)
     #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
+    teacher = model.VGG16_V(n_classes, hsic_training=args.hsic_training, dataset=args.dataset)
+    e_path = '/workspace/data/'
+    ckp_E = torch.load(e_path)
+    teacher.load_state_dict(ckp_E, strict=False)
+    teacher = teacher.cuda()
 
     best_ACC = -1
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
-        train_loss, train_acc = engine.train(net, criterion, optimizer, trainloader)
-        test_loss, test_acc = engine.test(net, criterion, optimizer, trainloader)
+        train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
+        test_loss, test_acc = engine.test_kd(net,teacher, criterion, optimizer, trainloader)
         if test_acc > best_ACC:
             best_ACC = test_acc
             best_model = deepcopy(net)
