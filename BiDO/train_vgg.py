@@ -103,18 +103,15 @@ def main(args, loaded_args, trainloader, testloader):
     best_ACC = -1
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
-        train_loss, train_acc = engine.train_HSIC(net, criterion, optimizer, trainloader, a1, a2, n_classes,
-                                                    ktype=args.ktype,
-                                                    hsic_training=args.hsic_training)
-        test_loss, test_acc = engine.test_HSIC(net, criterion, testloader, a1, a2, n_classes, ktype=args.ktype,
-                                                hsic_training=args.hsic_training)
-
+        train_loss, train_acc = engine.train(net, criterion, optimizer, trainloader)
+        test_loss, test_acc = engine.test(net, criterion, optimizer, trainloader)
         if test_acc > best_ACC:
             best_ACC = test_acc
             best_model = deepcopy(net)
-        scheduler.step()
+        #scheduler.step()
 
     print("best acc:", best_ACC)
+    mlflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
     }, model_path, "{}_{:.3f}&{:.3f}_{:.2f}.tar".format(model_name, a1, a2, best_ACC))
