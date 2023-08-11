@@ -96,7 +96,7 @@ def main(args, loaded_args, trainloader, testloader):
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
         train_loss, train_acc = engine.train(net, criterion, optimizer, trainloader)
-        test_loss, test_acc = engine.test(net, criterion, optimizer, trainloader)
+        test_loss, test_acc = engine.test(net, criterion, optimizer, testloader)
         if test_acc > best_ACC:
             best_ACC = test_acc
             best_model = deepcopy(net)
@@ -107,3 +107,52 @@ def main(args, loaded_args, trainloader, testloader):
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
     }, model_path, "{}_{:.3f}&{:.3f}_{:.2f}.tar".format(model_name, a1, a2, best_ACC))
+
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser(description='train with BiDO')
+    parser.add_argument('--dataset', default='celeba', help='celeba | mnist | cifar')
+    parser.add_argument('--measure', default='Vanilla', help='HSIC | COCO')
+    parser.add_argument('--ktype', default='linear', help='gaussian, linear, IMQ')
+    parser.add_argument('--hsic_training', default=True, help='multi-layer constraints', type=bool)
+    parser.add_argument('--root_path', default='./', help='')
+    parser.add_argument('--config_dir', default='./config', help='')
+    parser.add_argument('--model_dir', default='./target_model', help='')
+    args = parser.parse_args()
+
+    model_path = os.path.join(args.root_path, args.model_dir, args.dataset, 'Vanilla')
+    os.makedirs(model_path, exist_ok=True)
+
+    file = os.path.join(args.config_dir, args.dataset + ".json")
+
+    loaded_args = utils.load_json(json_file=file)
+    model_name = loaded_args["dataset"]["model_name"]
+
+
+    data_path = '/workspace/data/'
+    batch_size = 64
+    train_folder = 'train/'
+    test_folder = 'test/'
+    image_transforms = {
+        'train': transforms.Compose([
+            transforms.CenterCrop((128,128)),
+            transforms.Resize(64),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
+        ]),
+        'test': transforms.Compose([
+            transforms.CenterCrop((128,128)),
+            transforms.Resize(64),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
+        ])
+    }
+    train_images = datasets.ImageFolder(data_path+train_folder,image_transforms['train'])
+    train_loader = torch.utils.data.DataLoader(train_images, batch_size = 64 ,num_workers=4,shuffle=True)
+    test_images = datasets.ImageFolder(data_path+test_folder,image_transforms['test'])
+    test_loader = torch.utils.data.DataLoader(test_images, batch_size = 64 ,num_workers=4,shuffle=True) 
+ 
+
+
+    main(args, loaded_args, train_loader, test_loader)
