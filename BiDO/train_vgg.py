@@ -1,4 +1,4 @@
-import torch, os, classify, sys
+import torch, os, sys
 import numpy as np 
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
@@ -91,7 +91,7 @@ def main(args, loaded_args, trainloader, testloader):
 
     net = torch.nn.DataParallel(net).to(device)
     #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
-
+    print('ah?')
     best_ACC = -1
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
