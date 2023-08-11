@@ -26,7 +26,9 @@ from torch.optim.lr_scheduler import MultiStepLR
 from copy import deepcopy
 import collections
 from util import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
-
+import utils
+import model
+import engine
 device = "cuda"
 
 def load_my_state_dict(net, state_dict):
@@ -64,7 +66,7 @@ def main(args, loaded_args, trainloader, testloader):
     weight_decay = loaded_args[model_name]["weight_decay"]
     momentum = loaded_args[model_name]["momentum"]
     n_epochs = loaded_args[model_name]["epochs"]
-    lr = 0.001
+    lr = 0.0001
     milestones = loaded_args[model_name]["adjust_epochs"]
 
     hp_list = [
@@ -75,7 +77,7 @@ def main(args, loaded_args, trainloader, testloader):
 
 
     if model_name == "VGG16" or model_name == "reg":
-        net = model.VGG16_V(n_classes, hsic_training=args.hsic_training, dataset=args.dataset)
+        net = model.VGG16_V(n_classes)
 
         load_pretrained_feature_extractor = False
         if load_pretrained_feature_extractor:
@@ -96,7 +98,7 @@ def main(args, loaded_args, trainloader, testloader):
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
         train_loss, train_acc = engine.train(net, criterion, optimizer, trainloader)
-        test_loss, test_acc = engine.test(net, criterion, optimizer, testloader)
+        test_acc = engine.test(net, criterion, testloader)
         if test_acc > best_ACC:
             best_ACC = test_acc
             best_model = deepcopy(net)
@@ -106,7 +108,7 @@ def main(args, loaded_args, trainloader, testloader):
     mlflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, model_path, "{}_{:.3f}&{:.3f}_{:.2f}.tar".format(model_name, a1, a2, best_ACC))
+    }, model_path, "{}_{:.3f}&{:.3f}_{:.2f}.tar".format(model_name, 0, 0, best_ACC))
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -151,7 +153,7 @@ if __name__ == '__main__':
     train_images = datasets.ImageFolder(data_path+train_folder,image_transforms['train'])
     train_loader = torch.utils.data.DataLoader(train_images, batch_size = 64 ,num_workers=4,shuffle=True)
     test_images = datasets.ImageFolder(data_path+test_folder,image_transforms['test'])
-    test_loader = torch.utils.data.DataLoader(test_images, batch_size = 64 ,num_workers=4,shuffle=True) 
+    test_loader = torch.utils.data.DataLoader(test_images, batch_size = 128,num_workers=4,shuffle=True) 
  
 
 

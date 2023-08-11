@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/cd60f55d31ac469691944cbb5dac9df4/artifacts
+end_time: 1691731479698
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: cd60f55d31ac469691944cbb5dac9df4
+run_name: merciful-wasp-362
+run_uuid: cd60f55d31ac469691944cbb5dac9df4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691731479591
+status: 3
+tags: []
+user_id: root

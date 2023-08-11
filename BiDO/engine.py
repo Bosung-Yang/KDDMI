@@ -14,16 +14,19 @@ def test(model, criterion, dataloader):
     tf = time.time()
     model.eval()
     loss, cnt, ACC = 0.0, 0, 0
-
-    for img, iden in dataloader:
+    pbar = tqdm(enumerate(dataloader),total = len(dataloader),ncols=150)
+    for _, data in pbar:
+        img, iden = data
         img, iden = img.to(device), iden.to(device)
         bs = img.size(0)
         iden = iden.view(-1)
-
         out_digit = model(img)[-1]
         out_iden = torch.argmax(out_digit, dim=1).view(-1)
         ACC += torch.sum(iden == out_iden).item()
         cnt += bs
+    print(ACC/cnt)
+
+        
 
     return ACC * 100.0 / cnt
 
