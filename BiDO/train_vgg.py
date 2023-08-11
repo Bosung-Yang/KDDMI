@@ -61,7 +61,7 @@ def load_feature_extractor(net, state_dict):
         net_state[name].copy_(mew_param.data)
 
 def main(args, loaded_args, trainloader, testloader):
-    n_classes = loaded_args["dataset"]["n_classes"]
+    n_classes = 1000
     model_name = loaded_args["dataset"]["model_name"]
     weight_decay = loaded_args[model_name]["weight_decay"]
     momentum = loaded_args[model_name]["momentum"]
@@ -77,7 +77,7 @@ def main(args, loaded_args, trainloader, testloader):
 
 
     if model_name == "VGG16" or model_name == "reg":
-        net = model.VGG16_V(n_classes)
+        net = model.VGG16_VS(n_classes)
 
         load_pretrained_feature_extractor = False
         if load_pretrained_feature_extractor:

@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/59fd758715b8486eb64d39e2244666a8/artifacts
+end_time: 1691743479223
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 59fd758715b8486eb64d39e2244666a8
+run_name: zealous-hare-760
+run_uuid: 59fd758715b8486eb64d39e2244666a8
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691743479116
+status: 3
+tags: []
+user_id: root

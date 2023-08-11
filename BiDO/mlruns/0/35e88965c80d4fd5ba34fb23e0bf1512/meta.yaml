@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/35e88965c80d4fd5ba34fb23e0bf1512/artifacts
+end_time: 1691740278933
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 35e88965c80d4fd5ba34fb23e0bf1512
+run_name: bustling-turtle-307
+run_uuid: 35e88965c80d4fd5ba34fb23e0bf1512
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691740278789
+status: 3
+tags: []
+user_id: root
