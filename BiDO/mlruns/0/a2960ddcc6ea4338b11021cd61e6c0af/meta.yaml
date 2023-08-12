@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/a2960ddcc6ea4338b11021cd61e6c0af/artifacts
+end_time: 1691846353608
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: a2960ddcc6ea4338b11021cd61e6c0af
+run_name: rebellious-crane-153
+run_uuid: a2960ddcc6ea4338b11021cd61e6c0af
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691846353600
+status: 3
+tags: []
+user_id: root

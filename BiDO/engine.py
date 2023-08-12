@@ -388,7 +388,7 @@ def train_kd(model,teacher, criterion, optimizer, trainloader):
 
         feats, label = model(inputs)
         feats, tlabel = teacher(inputs)
-        cross_loss = criterion(iden, label, tlabel, 0,0)
+        cross_loss = criterion(label, iden, tlabel, 0,0)
         loss = cross_loss
         optimizer.zero_grad()
         loss.backward()

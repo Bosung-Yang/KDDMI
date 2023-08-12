@@ -11,7 +11,7 @@ import mlflow.pytorch
 from mlflow.models import infer_signature
 import mlflow
 device = "cuda"
-
+import torch.nn.functional as F
 
 def load_my_state_dict(net, state_dict):
     print("load nature model!!!")
@@ -187,6 +187,7 @@ def distillation(y, labels, teacher_scores, T, alpha):
     # y: student
     # labels: hard label
     # teacher_scores: soft label
+    #y=y.view(-1)
     return  F.cross_entropy(y,labels) + nn.MSELoss()(y,teacher_scores)
     #return nn.MSELoss()(y,teacher_scores)
 
@@ -224,7 +225,7 @@ def KD(args, n_classes, trainloader, testloader):
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
         train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
-        test_loss, test_acc = engine.test(net, criterion, optimizer, testloader)
+        test_acc = engine.test(net, criterion, testloader)
         if test_acc > best_ACC:
             best_ACC = test_acc
             best_model = deepcopy(net)
@@ -234,7 +235,7 @@ def KD(args, n_classes, trainloader, testloader):
     mlflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, model_path, "{}_{:.3f}&{:.3f}_{:.2f}.tar".format(model_name, a1, a2, best_ACC))
+        }, model_path, "{}_{:.4f}.tar".format(model_name+'kd', best_ACC))
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
