@@ -491,7 +491,6 @@ def train_kd(model,teacher, criterion, optimizer, trainloader):
         feats, label = model(inputs)
         feats, tlabel = teacher(inputs)
         cross_loss = criterion(iden, label, tlabel, 0,0)
-        # triplet_loss = triplet(feats, iden)
         loss = cross_loss
         optimizer.zero_grad()
         loss.backward()
