@@ -46,7 +46,7 @@ def load_feature_extractor(net, state_dict):
 def HSIC(args, trainloader, testloader):
     n_classes = 1000
     hp_list = [
-        (0.1, 0.5),(0,0),(0.01,0), (0.01,0.01)
+        (0.01,0.1)
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -78,16 +78,16 @@ def HSIC(args, trainloader, testloader):
         optimizer = torch.optim.Adam(net.parameters(), lr)
 
         net = torch.nn.DataParallel(net).to(device)
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[35], gamma=0.5)
 
         best_ACC = -1
         for epoch in range(n_epochs):
             print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
             train_loss, train_acc = engine.train_HSIC(net, criterion, optimizer, trainloader, a1, a2, n_classes,
-                                                      ktype=args.ktype,
-                                                      hsic_training=args.hsic_training)
-            test_loss, test_acc = engine.test_HSIC(net, criterion, testloader, a1, a2, n_classes, ktype=args.ktype,
-                                                   hsic_training=args.hsic_training)
+                                                      ktype='linear',
+                                                      hsic_training=True)
+            test_loss, test_acc = engine.test_HSIC(net, criterion, testloader, a1, a2, n_classes, ktype='linear',
+                                                   hsic_training=True)
 
             if test_acc > best_ACC:
                 best_ACC = test_acc
@@ -131,8 +131,8 @@ def VIB(args,trainloader, testloader):
 
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, lr))
-        train_loss, train_acc = engine.train_vib(net, criterion, optimizer, trainloader, 0.2)
-        test_loss, test_acc = engine.test_vib(net, criterion, testloader, 0,2)
+        train_loss, train_acc = engine.train_vib(net, criterion, optimizer, trainloader, 0.01)
+        test_loss, test_acc = engine.test_vib(net, criterion, testloader, 0.01)
 
         if test_acc > best_ACC:
             best_ACC = test_acc

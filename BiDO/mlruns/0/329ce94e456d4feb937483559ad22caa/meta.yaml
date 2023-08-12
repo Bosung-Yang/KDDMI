@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/329ce94e456d4feb937483559ad22caa/artifacts
+end_time: 1691824296413
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 329ce94e456d4feb937483559ad22caa
+run_name: handsome-frog-626
+run_uuid: 329ce94e456d4feb937483559ad22caa
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691824296254
+status: 3
+tags: []
+user_id: root

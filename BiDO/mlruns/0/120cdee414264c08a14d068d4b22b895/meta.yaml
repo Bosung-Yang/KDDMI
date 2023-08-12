@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/120cdee414264c08a14d068d4b22b895/artifacts
+end_time: 1691831853720
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 120cdee414264c08a14d068d4b22b895
+run_name: charming-turtle-968
+run_uuid: 120cdee414264c08a14d068d4b22b895
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691831853613
+status: 3
+tags: []
+user_id: root

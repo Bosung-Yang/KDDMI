@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/5f4de2bb1c75414484484b8ab12b842f/artifacts
+end_time: 1691829985776
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 5f4de2bb1c75414484484b8ab12b842f
+run_name: placid-goat-785
+run_uuid: 5f4de2bb1c75414484484b8ab12b842f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1691829985671
+status: 3
+tags: []
+user_id: root
