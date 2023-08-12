@@ -190,7 +190,7 @@ def distillation(y, labels, teacher_scores, T, alpha):
     return  F.cross_entropy(y,labels) + nn.MSELoss()(y,teacher_scores)
     #return nn.MSELoss()(y,teacher_scores)
 
-def main(args, n_classes, trainloader, testloader):
+def KD(args, n_classes, trainloader, testloader):
     n_epochs = 50
     lr = 0.0001
 
@@ -215,7 +215,7 @@ def main(args, n_classes, trainloader, testloader):
     net = torch.nn.DataParallel(net).to(device)
     #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
     teacher = model.VGG16_V(n_classes)
-    e_path = '/workspace/data/'
+    e_path = '/workspace/data/target_model/celeba/NODEF/VGG16_0.000&0.000_77.47.tar'
     ckp_E = torch.load(e_path)
     teacher.load_state_dict(ckp_E, strict=False)
     teacher = teacher.cuda()
