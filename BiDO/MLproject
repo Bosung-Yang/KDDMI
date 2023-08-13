@@ -1,0 +1,19 @@
+name: vgg_training
+
+python_env: python_env.yaml
+
+entry_points:
+  main:
+    parameters:
+      gpu: {type: string, default: 0}
+      defense: {type: string, default: 'NODEF'}
+      model: {type: string, default: 'VGG16'}
+      num_class: {type: int, default: 2000}
+      seed: {type: int, default: 1}
+
+    command: |
+          python train.py \
+            --model {model} \
+            --temp {temp} \
+            --nclass {num_class}\
+            --defense {defense}

@@ -134,7 +134,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_path', default='/workspace/data/')
     parser.add_argument('--verbose', action='store_true', help='')
     parser.add_argument('--iter', default=3000, type=int)
-
+    parser.add_argument('--box', default='white', type=str)
     args = parser.parse_args()
 
     ############################# mkdirs ##############################
@@ -196,7 +196,7 @@ if __name__ == '__main__':
 
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'], strict=False)
-                E=T
+                if args.box =='white': E = T
 
                 res_all = []
                 ids = 300
@@ -231,6 +231,7 @@ if __name__ == '__main__':
                     checkpoint = torch.load(path_T)
                     ckp_T = torch.load(path_T)
                     T.load_state_dict(ckp_T['state_dict'])
+                    if args.box =='white': E = T
                     res_all = []
                     ids = 300
                     times = 5
@@ -250,7 +251,7 @@ if __name__ == '__main__':
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
                     print(f'FID:{fid_value:.4f}')
 
-            elif args.defense == 'reg':
+            elif args.defense == 'NODEF':
                 path_T = os.path.join(args.model_path, args.dataset, args.defense, "vs2000tovgg.pth")
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16(num_classes)
@@ -260,6 +261,7 @@ if __name__ == '__main__':
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T, strict=False)
                 T=T.cuda()
+                if args.box =='white': E = T
 
                 res_all = []
                 ids = 300
@@ -284,7 +286,7 @@ if __name__ == '__main__':
                 path_T = os.path.join(args.model_path, "vs2000tovgg.pth")
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_(2000)
-                E=T
+                if args.box =='white': E = T
                 #T = nn.DataParallel(T).cuda()
 
                 checkpoint = torch.load(path_T)
