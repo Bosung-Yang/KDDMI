@@ -191,51 +191,76 @@ def distillation(y, labels, teacher_scores, T, alpha):
     return  F.cross_entropy(y,labels) + nn.MSELoss()(y,teacher_scores)
     #return nn.MSELoss()(y,teacher_scores)
 
+def mse(y, labels, teacher_scores, T, alpha):
+    # distillation loss + classification loss
+    # y: student
+    # labels: hard label
+    # teacher_scores: soft label
+    #y=y.view(-1)
+    return   nn.MSELoss()(y,teacher_scores)
+    #return nn.MSELoss()(y,teacher_scores)
+
+def all_func(y, labels, teacher_scores, T, alpha):
+    # distillation loss + classification loss
+    # y: student
+    # labels: hard label
+    # teacher_scores: soft label
+    #y=y.view(-1)
+    return   0.1 * nn.MSELoss()(y,teacher_scores) + nn.KLDivLoss()(F.log_softmax(y/T), F.softmax(teacher_scores/T)) * (T*T * 2.0 + alpha) + F.cross_entropy(y,labels) * (1.-alpha)
+    #return nn.MSELoss()(y,teacher_scores)
+
+def temp(y, labels, teacher_scores, T, alpha=8):
+    # distillation loss + classification loss
+    # y: student
+    # labels: hard label
+    # teacher_scores: soft label
+    return nn.KLDivLoss()(F.log_softmax(y/T), F.softmax(teacher_scores/T)) * (T*T * 2.0 + alpha) + F.cross_entropy(y,labels) * (1.-alpha)
+
 def KD(args, n_classes, trainloader, testloader):
     n_epochs = 50
     lr = 0.0001
 
-    criterion = distillation
+    lossfns = [distillation, mse, temp, all_func]
+    for loss in lossfns:
+        criterion = loss
+        if model_name == "VGG16" or model_name == "reg":
+            net = model.VGG16_V(n_classes)
 
+            load_pretrained_feature_extractor = False
+            if load_pretrained_feature_extractor:
+                pretrained_model_ckpt = "/workspace/data/vgg.pth"
+                checkpoint = torch.load(pretrained_model_ckpt)
+                load_feature_extractor(net, checkpoint)
 
-    if model_name == "VGG16" or model_name == "reg":
-        net = model.VGG16_V(n_classes)
+        elif model_name == "ResNet":
+            net = model.ResNetCls(nclass=n_classes, resnetl=10)
+            # net = model.ResNet18(n_classes=n_classes)
 
-        load_pretrained_feature_extractor = False
-        if load_pretrained_feature_extractor:
-            pretrained_model_ckpt = "/workspace/data/vgg.pth"
-            checkpoint = torch.load(pretrained_model_ckpt)
-            load_feature_extractor(net, checkpoint)
+        optimizer = torch.optim.Adam(net.parameters(), lr)
 
-    elif model_name == "ResNet":
-        net = model.ResNetCls(nclass=n_classes, resnetl=10)
-        # net = model.ResNet18(n_classes=n_classes)
+        net = torch.nn.DataParallel(net).to(device)
+        #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
+        teacher = model.VGG16_V(n_classes)
+        e_path = '/workspace/data/target_model/celeba/NODEF/VGG16_0.000&0.000_77.47.tar'
+        ckp_E = torch.load(e_path)
+        teacher.load_state_dict(ckp_E, strict=False)
+        teacher = teacher.cuda()
 
-    optimizer = torch.optim.Adam(net.parameters(), lr)
+        best_ACC = -1
+        for epoch in range(n_epochs):
+            print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
+            train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
+            test_acc = engine.test(net, criterion, testloader)
+            if test_acc > best_ACC:
+                best_ACC = test_acc
+                best_model = deepcopy(net)
+            #scheduler.step()
 
-    net = torch.nn.DataParallel(net).to(device)
-    #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
-    teacher = model.VGG16_V(n_classes)
-    e_path = '/workspace/data/target_model/celeba/NODEF/VGG16_0.000&0.000_77.47.tar'
-    ckp_E = torch.load(e_path)
-    teacher.load_state_dict(ckp_E, strict=False)
-    teacher = teacher.cuda()
-
-    best_ACC = -1
-    for epoch in range(n_epochs):
-        print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
-        train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
-        test_acc = engine.test(net, criterion, testloader)
-        if test_acc > best_ACC:
-            best_ACC = test_acc
-            best_model = deepcopy(net)
-        #scheduler.step()
-
-    print("best acc:", best_ACC)
-    mlflow.log_metric("accuracy", best_ACC)
-    utils.save_checkpoint({
-        'state_dict': best_model.state_dict(),
-        }, model_path, "{}_{:.4f}.tar".format(model_name+'kd', best_ACC))
+        print("best acc:", best_ACC)
+        mlflow.log_metric("accuracy", best_ACC)
+        utils.save_checkpoint({
+            'state_dict': best_model.state_dict(),
+            }, model_path, "{}_{:.4f}.tar".format(model_name+'kd', best_ACC))
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
