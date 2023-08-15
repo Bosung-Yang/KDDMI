@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/bd92df6acdf240e1bb1cf45c9b567f0b/artifacts
+end_time: 1692103903013
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: bd92df6acdf240e1bb1cf45c9b567f0b
+run_name: burly-lark-811
+run_uuid: bd92df6acdf240e1bb1cf45c9b567f0b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692090959783
+status: 3
+tags: []
+user_id: root

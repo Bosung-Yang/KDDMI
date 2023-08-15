@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/f8bdb40a32f742bc8cf425eb1f4a4bfa/artifacts
+end_time: 1692108602737
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: f8bdb40a32f742bc8cf425eb1f4a4bfa
+run_name: rare-snail-720
+run_uuid: f8bdb40a32f742bc8cf425eb1f4a4bfa
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692107480963
+status: 3
+tags: []
+user_id: root

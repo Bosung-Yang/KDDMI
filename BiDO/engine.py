@@ -22,13 +22,11 @@ def test(model, criterion, dataloader):
         iden = iden.view(-1)
         out_digit = model(img)[-1]
         out_iden = torch.argmax(out_digit, dim=1).view(-1)
-        ACC += torch.sum(iden == out_iden).item()
-        cnt += bs
-    print(ACC/cnt)
-
-        
-
+        ACC += torch.sum(iden == out_iden)
+        cnt+=bs
+                         
     return ACC * 100.0 / cnt
+
 
 
 def multilayer_hsic(model, criterion, inputs, target, a1, a2, n_classes, ktype, hsic_training, measure):

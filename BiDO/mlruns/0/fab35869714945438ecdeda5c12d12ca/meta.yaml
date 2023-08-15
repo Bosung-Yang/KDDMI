@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/fab35869714945438ecdeda5c12d12ca/artifacts
+end_time: 1692079025200
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: fab35869714945438ecdeda5c12d12ca
+run_name: polite-rat-412
+run_uuid: fab35869714945438ecdeda5c12d12ca
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692077899700
+status: 3
+tags: []
+user_id: root

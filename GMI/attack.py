@@ -67,7 +67,7 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
             Iden_Loss_val = Iden_Loss.item()
 
             if verbose:
-                if (i + 1) % 500 == 0:
+                if (i + 1) % 500 == 10:
                     fake_img = G(z.detach())
 
                     if args.dataset == 'tceleba':
@@ -76,7 +76,8 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                         eval_prob = E(fake_img)[-1]
 
                     eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
-                    acc = iden.eq(eval_iden.long()).sum().item() * 100.0 / bs
+                    cnt = 0
+                    acc = iden.eq(eval_iden.long()).sum().item() * 1.0 / bs
                     print("Iteration:{}\tPrior Loss:{:.2f}\tIden Loss:{:.2f}\tAttack Acc:{:.2f}".format(i + 1,
                                                                                                         Prior_Loss_val,
                                                                                                         Iden_Loss_val,
@@ -128,15 +129,16 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
 if __name__ == '__main__':
     parser = ArgumentParser(description='Step2: targeted recovery')
     parser.add_argument('--dataset', default='celeba', help='celeba | cxr | mnist')
-    parser.add_argument('--defense', default='HSIC', help='reg | vib | HSIC')
+    parser.add_argument('--defense', default='vib', help='reg | vib | HSIC')
     parser.add_argument('--save_img_dir', default='./attack_res/')
     parser.add_argument('--success_dir', default='./attack_success')
-    parser.add_argument('--model_path', default='/workspace/data/')
+    parser.add_argument('--model_path', default='/workspace/data/target_model')
     parser.add_argument('--verbose', action='store_true', help='')
     parser.add_argument('--iter', default=3000, type=int)
     parser.add_argument('--box', default='white', type=str)
     args = parser.parse_args()
 
+    print(args.defense)
     ############################# mkdirs ##############################
     args.save_img_dir = os.path.join(args.save_img_dir, args.dataset, args.defense)
     args.success_dir = args.save_img_dir + "/res_success"
@@ -144,94 +146,90 @@ if __name__ == '__main__':
     args.save_img_dir = os.path.join(args.save_img_dir, 'all')
     os.makedirs(args.save_img_dir, exist_ok=True)
 
-    eval_path = "./eval_model"
-    ############################# mkdirs ##############################
+    g_path = "/workspace/data/celeba_G.tar"
+    G = generator.Generator()
+    G = nn.DataParallel(G).cuda()
+    ckp_G = torch.load(g_path)
+    G.load_state_dict(ckp_G['state_dict'], strict=False)
 
-    if args.dataset == 'celeba':
-        model_name = "VGG16"
-        num_classes = 1000
+    d_path = "/workspace/data/celeba_D.tar"
+    D = discri.DGWGAN()
+    D = nn.DataParallel(D).cuda()
+    ckp_D = torch.load(d_path)
+    D.load_state_dict(ckp_D['state_dict'], strict=False)
 
-        e_path = os.path.join('/workspace/data/', "vgg.pth")
-        E = model.VGG16(num_classes)
-        #E = nn.DataParallel(E).cuda()
-        ckp_E = torch.load(e_path)
-        E.load_state_dict(ckp_E, strict=False)
-        E = E.cuda()
-        
 
-        g_path = "/workspace/data/celeba_G.tar"
-        G = generator.Generator()
-        G = nn.DataParallel(G).cuda()
-        ckp_G = torch.load(g_path)
-        G.load_state_dict(ckp_G['state_dict'], strict=False)
+    if args.defense == 'HSIC' or args.defense == 'COCO':
+        hp_ac_list = [
+            (0.1,0.1,73.48)
+            # HSIC
+            # 1
+            # (0.05, 0.5, 80.35),
+            # (0.05, 1.0, 70.08),
+            # (0.05, 2.5, 56.18),
+            # 2
+            # (0.05, 0.5, 78.89),
+            # (0.05, 1.0, 69.68),
+            # (0.05, 2.5, 56.62),
+        ]
+        for (a1, a2, ac) in hp_ac_list:
+            print("a1:", a1, "a2:", a2, "test_acc:", ac)
 
-        d_path = "/workspace/data/celeba_D.tar"
-        D = discri.DGWGAN()
-        D = nn.DataParallel(D).cuda()
-        ckp_D = torch.load(d_path)
-        D.load_state_dict(ckp_D['state_dict'], strict=False)
+            T = model.VGG16(num_classes, True)
+            T = nn.DataParallel(T).cuda()
 
-        if args.defense == 'HSIC' or args.defense == 'COCO':
-            hp_ac_list = [
-                (0.1,0.1,73.48)
-                # HSIC
-                # 1
-                # (0.05, 0.5, 80.35),
-                # (0.05, 1.0, 70.08),
-                # (0.05, 2.5, 56.18),
-                # 2
-                # (0.05, 0.5, 78.89),
-                # (0.05, 1.0, 69.68),
-                # (0.05, 2.5, 56.62),
-            ]
-            for (a1, a2, ac) in hp_ac_list:
-                print("a1:", a1, "a2:", a2, "test_acc:", ac)
+            model_tar = f"{model_name}_{a1:.3f}&{a2:.3f}_{ac:.2f}.tar"
 
-                T = model.VGG16(num_classes, True)
-                T = nn.DataParallel(T).cuda()
+            path_T = os.path.join(args.model_path, args.dataset, args.defense, model_tar)
 
-                model_tar = f"{model_name}_{a1:.3f}&{a2:.3f}_{ac:.2f}.tar"
+            ckp_T = torch.load(path_T)
+            T.load_state_dict(ckp_T['state_dict'], strict=False)
+            if args.box =='white': E = T
 
-                path_T = os.path.join(args.model_path, args.dataset, args.defense, model_tar)
+            res_all = []
+            ids = 300
+            times = 5
+            ids_per_time = ids // times
+            iden = torch.from_numpy(np.arange(ids_per_time))
+            for idx in range(times):
+                print("--------------------- Attack batch [%s]------------------------------" % idx)
+                res = inversion(args, G, D, T, E, iden, iter_times=100, verbose=True)
+                res_all.append(res)
+                iden = iden + ids_per_time
 
-                ckp_T = torch.load(path_T)
-                T.load_state_dict(ckp_T['state_dict'], strict=False)
-                if args.box =='white': E = T
+            res = np.array(res_all).mean(0)
+            #fid_value = calculate_fid_given_paths(args.dataset,
+            #                                      [f'attack_res/{args.dataset}/trainset/',
+            #                                       f'attack_res/{args.dataset}/{args.defense}/all/'],
+            #                                      50, 1, 2048)
+            print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
+            print(f'FID:{fid_value:.4f}')
 
-                res_all = []
-                ids = 300
-                times = 5
-                ids_per_time = ids // times
-                iden = torch.from_numpy(np.arange(ids_per_time))
-                for idx in range(times):
-                    print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res = inversion(args, G, D, T, E, iden, iter_times=100, verbose=True)
-                    res_all.append(res)
-                    iden = iden + ids_per_time
-
-                res = np.array(res_all).mean(0)
-                #fid_value = calculate_fid_given_paths(args.dataset,
-                #                                      [f'attack_res/{args.dataset}/trainset/',
-                #                                       f'attack_res/{args.dataset}/{args.defense}/all/'],
-                #                                      50, 1, 2048)
-                print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-                print(f'FID:{fid_value:.4f}')
-
-        else:
+    else:
             if args.defense == "vib":
                 path_T_list = [
-                    os.path.join(args.model_path, args.dataset, args.defense, "VGG16_vib_beta0.010_61.55.tar")#,
+                    '/workspace/data/target_model/celeba/VIB/VGG16_vib_beta0.010_60.15.tar'#,
                     #os.path.join(args.model_path, args.dataset, args.defense, "VGG16_beta0.010_67.72.tar"),
                     #os.path.join(args.model_path, args.dataset, args.defense, "VGG16_beta0.020_59.24.tar"),
                 ]
                 for path_T in path_T_list:
-                    T = model.VGG16_vib(num_classes)
+                    T = model.VGG16_vib(1000)
                     T = nn.DataParallel(T).cuda()
 
                     checkpoint = torch.load(path_T)
                     ckp_T = torch.load(path_T)
                     T.load_state_dict(ckp_T['state_dict'])
                     if args.box =='white': E = T
+                    else :
+                        path_E = os.path.join(args.model_path, args.dataset, 'NODEF', "VGG16_1000_79.63.tar")
+                        # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
+                        E = model.VGG16_V(1000)
+
+                        E = nn.DataParallel(E).cuda()
+
+                        ckp_E = torch.load(path_E)
+                        E.load_state_dict(ckp_E, strict=False)
+                        E=E.cuda()
                     res_all = []
                     ids = 300
                     times = 5
@@ -239,7 +237,7 @@ if __name__ == '__main__':
                     iden = torch.from_numpy(np.arange(ids_per_time))
                     for idx in range(times):
                         print("--------------------- Attack batch [%s]------------------------------" % idx)
-                        res = inversion(args, G, D, T, E, iden, iter_times=100, verbose=True)
+                        res = inversion(args, G, D, T, E, iden, iter_times=2000, verbose=True)
                         res_all.append(res)
                         iden = iden + ids_per_time
 
@@ -250,11 +248,16 @@ if __name__ == '__main__':
                     #                                      50, 1, 2048)
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
                     print(f'FID:{fid_value:.4f}')
+                     #    [f'attack_res/{args.dataset}/trainset/',
+                    #                                       f'attack_res/{args.dataset}/{args.defense}/all/'],
+                #                                      50, 1, 2048)
+                    print(f"AccVGG16_1000_78.56.tar+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
+                    print(f'FID:{fid_value:.4f}')
 
             elif args.defense == 'NODEF':
-                path_T = os.path.join(args.model_path, args.dataset, args.defense, "vs2000tovgg.pth")
+                path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_1000_79.63.tar")
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
-                T = model.VGG16(num_classes)
+                T = model.VGG16_V(1000)
 
                 T = nn.DataParallel(T).cuda()
 
@@ -262,6 +265,16 @@ if __name__ == '__main__':
                 T.load_state_dict(ckp_T, strict=False)
                 T=T.cuda()
                 if args.box =='white': E = T
+                else :
+                    path_E = os.path.join(args.model_path, args.dataset, 'NODEF', "VGG16_1000_79.63.tar")
+                    # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
+                    E = model.VGG16_V(1000)
+
+                    E = nn.DataParallel(E).cuda()
+
+                    ckp_E = torch.load(path_E)
+                    E.load_state_dict(ckp_E, strict=False)
+                    E = E.cuda()
 
                 res_all = []
                 ids = 300
@@ -273,12 +286,8 @@ if __name__ == '__main__':
                     res = inversion(args, G, D, T, E, iden, lr=2e-2, iter_times=2000, verbose=True)
                     res_all.append(res)
                     iden = iden + ids_per_time
-
+                
                 res = np.array(res_all).mean(0)
-                fid_value = calculate_fid_given_paths(args.dataset,
-                                                      [f'attack_res/{args.dataset}/trainset/',
-                                                       f'attack_res/{args.dataset}/{args.defense}/all/'],
-                                                      50, 1, 2048)
                 print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
                 print(f'FID:{fid_value:.4f}')
 
@@ -309,59 +318,3 @@ if __name__ == '__main__':
                 
                 print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
                 print(f'FID:{fid_value:.4f}')
-
-    elif args.dataset == 'mnist':
-        num_classes = 5
-
-        e_path = os.path.join(eval_path, "SCNN_99.28.tar")
-        E = model.SCNN(10)
-        E = nn.DataParallel(E).cuda()
-        ckp_E = torch.load(e_path)
-        E.load_state_dict(ckp_E['state_dict'])
-        g_path = "./result/models_mnist_gan/mnist_G_300.tar"
-        G = generator.GeneratorMNIST()
-        G = nn.DataParallel(G).cuda()
-        ckp_G = torch.load(g_path)
-        G.load_state_dict(ckp_G['state_dict'])
-
-        d_path = "./result/models_mnist_gan/mnist_D_300.tar"
-        D = discri.DGWGAN32()
-        D = nn.DataParallel(D).cuda()
-        ckp_D = torch.load(d_path)
-        D.load_state_dict(ckp_D['state_dict'])
-
-        if args.defense == "HSIC":
-            pass
-        else:
-            if args.defense == "vib":
-                T = model.MCNN_vib(num_classes)
-            elif args.defense == 'reg':
-                path_T = os.path.join(args.model_path, args.dataset, args.defense, "MCNN_reg_99.94.tar")
-                T = model.MCNN(num_classes)
-
-            T = nn.DataParallel(T).cuda()
-            checkpoint = torch.load(path_T)
-            ckp_T = torch.load(path_T)
-            T.load_state_dict(ckp_T['state_dict'])
-
-            aver_acc, aver_acc5, aver_var, aver_var5 = 0, 0, 0, 0
-            K = 1
-            for i in range(K):
-                if args.verbose:
-                    print('-------------------------')
-                iden = torch.from_numpy(np.arange(5))
-                acc, acc5, var, var5 = inversion(args, G, D, T, E, iden, lr=0.01, lamda=100,
-                                                 iter_times=args.iter, num_seeds=100, verbose=args.verbose)
-                aver_acc += acc / K
-                aver_acc5 += acc5 / K
-                aver_var += var / K
-                aver_var5 += var5 / K
-
-                os.system(
-                    "cd attack_res/pytorch-fid/ && python fid_score.py ../mnist/trainset/ ../mnist/HSIC/all/ --dataset=mnist")
-
-            print("Average Acc:{:.2f}\tAverage Acc5:{:.2f}\tAverage Acc_var:{:.4f}\tAverage Acc_var5:{:.4f}".format(
-                aver_acc,
-                aver_acc5,
-                aver_var,
-                aver_var5, ))

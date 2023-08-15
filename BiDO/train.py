@@ -46,7 +46,7 @@ def load_feature_extractor(net, state_dict):
 def HSIC(args, trainloader, testloader):
     n_classes = 1000
     hp_list = [
-        (0.01,0.1)
+                 (0.01, 0.00),(0.00, 0.01),
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -55,11 +55,11 @@ def HSIC(args, trainloader, testloader):
         print("a1:", a1, "a2:", a2)
 
         if model_name == "VGG16" or model_name == "reg":
-            net = model.VGG16(n_classes, hsic_training=True, dataset=args.dataset)
+            net = model.VGG16_V(n_classes)
 
-            load_pretrained_feature_extractor = False
+            load_pretrained_feature_extractor = True
             if load_pretrained_feature_extractor:
-                pretrained_model_ckpt = "/workspace/data/vgg.pth"
+                pretrained_model_ckpt = "/workspace/data/target_model/celeba/NODEF/VGG16_1000_78.56.tar"
                 checkpoint = torch.load(pretrained_model_ckpt)
                 load_feature_extractor(net, checkpoint)
 
@@ -86,7 +86,7 @@ def HSIC(args, trainloader, testloader):
             train_loss, train_acc = engine.train_HSIC(net, criterion, optimizer, trainloader, a1, a2, n_classes,
                                                       ktype='linear',
                                                       hsic_training=True)
-            test_loss, test_acc = engine.test_HSIC(net, criterion, testloader, a1, a2, n_classes, ktype='linear',
+            test_loss, test_acc = engine.test_HSIC(net, criterion, testloader, a1, a2, n_classes, ktype='gaussian',
                                                    hsic_training=True)
 
             if test_acc > best_ACC:
@@ -144,10 +144,9 @@ def VIB(args,trainloader, testloader):
     mlflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, model_path, "{}_beta{:.3f}_{:.2f}.tar".format(model_name, 0.2, best_ACC))
+    }, model_path, "{}_beta{:.3f}_{:.2f}.tar".format(model_name, 0.01, best_ACC))
 
 def NODEF(args, n_classes, trainloader, testloader):
-    n_classes = 1000
     model_name = 'VGG16'
     n_epochs = 50
     lr = 0.0001
@@ -156,7 +155,7 @@ def NODEF(args, n_classes, trainloader, testloader):
 
 
     if model_name == "VGG16" or model_name == "reg":
-        net = model.VGG16_VS(n_classes)
+        net = model.VGG16_V(n_classes)
 
     elif model_name == "ResNet":
         net = model.ResNetCls(nclass=n_classes, resnetl=10)
@@ -179,42 +178,9 @@ def NODEF(args, n_classes, trainloader, testloader):
     mlflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, model_path, "{}_{:.3f}&{:.3f}_{:.2f}.tar".format(model_name, 0, 0, best_ACC))
+    }, model_path, "{}_{}_{:.2f}.tar".format(model_name,n_classes, best_ACC))
 
 
-def distillation(y, labels, teacher_scores, T, alpha):
-    # distillation loss + classification loss
-    # y: student
-    # labels: hard label
-    # teacher_scores: soft label
-    #y=y.view(-1)
-    return  F.cross_entropy(y,labels) + nn.MSELoss()(y,teacher_scores)
-    #return nn.MSELoss()(y,teacher_scores)
-
-def mse(y, labels, teacher_scores, T, alpha):
-    # distillation loss + classification loss
-    # y: student
-    # labels: hard label
-    # teacher_scores: soft label
-    #y=y.view(-1)
-    return   nn.MSELoss()(y,teacher_scores)
-    #return nn.MSELoss()(y,teacher_scores)
-
-def all_func(y, labels, teacher_scores, T, alpha):
-    # distillation loss + classification loss
-    # y: student
-    # labels: hard label
-    # teacher_scores: soft label
-    #y=y.view(-1)
-    return   0.1 * nn.MSELoss()(y,teacher_scores) + nn.KLDivLoss()(F.log_softmax(y/T), F.softmax(teacher_scores/T)) * (T*T * 2.0 + alpha) + F.cross_entropy(y,labels) * (1.-alpha)
-    #return nn.MSELoss()(y,teacher_scores)
-
-def temp(y, labels, teacher_scores, T, alpha=8):
-    # distillation loss + classification loss
-    # y: student
-    # labels: hard label
-    # teacher_scores: soft label
-    return nn.KLDivLoss()(F.log_softmax(y/T), F.softmax(teacher_scores/T)) * (T*T * 2.0 + alpha) + F.cross_entropy(y,labels) * (1.-alpha)
 
 def KD(args, n_classes, trainloader, testloader):
     n_epochs = 50
@@ -317,7 +283,8 @@ if __name__ == '__main__':
     if args.defense == 'VIB':
         VIB(args, train_loader , test_loader)
     if args.defense=='NODEF':
-        NODEF(args, args.nclass, train_loader,test_loader)
+        NODEF(args, 1000, train_loader,test_loader)
+        NODEF(args, 2000, train_loader,test_loader)
     if args.defense=='KD':
         KD(args, args.nclass, train_loader, test_loader)
 

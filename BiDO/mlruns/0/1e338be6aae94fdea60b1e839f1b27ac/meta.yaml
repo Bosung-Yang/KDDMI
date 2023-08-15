@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/1e338be6aae94fdea60b1e839f1b27ac/artifacts
+end_time: 1692059844505
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 1e338be6aae94fdea60b1e839f1b27ac
+run_name: indecisive-mink-202
+run_uuid: 1e338be6aae94fdea60b1e839f1b27ac
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692059844354
+status: 3
+tags: []
+user_id: root
