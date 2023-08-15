@@ -50,8 +50,8 @@ def main(args, loaded_args, trainloader, testloader):
     best_acc = -1
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
-        train_loss, train_acc = engine.train_reg(net, criterion, optimizer, trainloader)
-        test_loss, test_acc = engine.test_reg(net, criterion, testloader)
+        train_loss, train_acc = engine.train(net, criterion, optimizer, trainloader)
+        test_loss, test_acc = engine.test(net, criterion, testloader)
 
         if test_acc > best_acc:
             best_acc = test_acc
