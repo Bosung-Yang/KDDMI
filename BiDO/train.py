@@ -55,11 +55,11 @@ def HSIC(args, trainloader, testloader):
         print("a1:", a1, "a2:", a2)
 
         if model_name == "VGG16" or model_name == "reg":
-            net = model.VGG16_V(n_classes)
+            net = model.VGG16(n_classes,hsic_training=True)
 
             load_pretrained_feature_extractor = True
             if load_pretrained_feature_extractor:
-                pretrained_model_ckpt = "/workspace/data/target_model/celeba/NODEF/VGG16_1000_78.56.tar"
+                pretrained_model_ckpt = "/workspace/data/target_model/celeba/NODEF/pretrained_79.33.tar "
                 checkpoint = torch.load(pretrained_model_ckpt)
                 load_feature_extractor(net, checkpoint)
 
