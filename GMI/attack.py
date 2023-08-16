@@ -132,7 +132,7 @@ if __name__ == '__main__':
     parser.add_argument('--defense', default='vib', help='reg | vib | HSIC')
     parser.add_argument('--save_img_dir', default='./attack_res/')
     parser.add_argument('--success_dir', default='./attack_success')
-    parser.add_argument('--model_path', default='./target_model')
+    parser.add_argument('--model_path', default='/workspace/data/target_model')
     parser.add_argument('--verbose', action='store_true', help='')
     parser.add_argument('--iter', default=3000, type=int)
     parser.add_argument('--box', default='white', type=str)
@@ -175,7 +175,7 @@ if __name__ == '__main__':
         for (a1, a2, ac) in hp_ac_list:
             print("a1:", a1, "a2:", a2, "test_acc:", ac)
 
-            T = model.VGG16(num_classes, True)
+            T = model.VGG16(1000, True)
             T = nn.DataParallel(T).cuda()
 
             model_tar = f"{model_name}_{a1:.3f}&{a2:.3f}_{ac:.2f}.tar"
