@@ -160,7 +160,7 @@ def NODEF(args, n_classes, trainloader, testloader):
     elif model_name == "ResNet":
         net = model.ResNetCls(nclass=n_classes, resnetl=10)
 
-    optimizer = torch.optim.Adam(net.parameters(), lr)
+    optimizer = torch.optim.SGD(net.parameters(), lr)
 
     net = torch.nn.DataParallel(net).to(device)
 
