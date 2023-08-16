@@ -155,7 +155,7 @@ def NODEF(args, n_classes, trainloader, testloader):
 
 
     if model_name == "VGG16" or model_name == "reg":
-        net = model.VGG16(n_classes)
+        net = model.VGG16(n_classes,hsic_training=True)
 
     elif model_name == "ResNet":
         net = model.ResNetCls(nclass=n_classes, resnetl=10)
