@@ -53,7 +53,7 @@ def main(args, loaded_args, trainloader, testloader):
     milestones = loaded_args[model_name]["adjust_epochs"]
 
     hp_list = [
-        (0.1, 0.5),(0,0),(0.01,0), (0.01,0.01)
+         (0.01,0), (0.01,0.01), (0.001,0.003)
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -64,7 +64,7 @@ def main(args, loaded_args, trainloader, testloader):
         if model_name == "VGG16" or model_name == "reg":
             net = model.VGG16(n_classes, hsic_training=args.hsic_training, dataset=args.dataset)
 
-            load_pretrained_feature_extractor = True
+            load_pretrained_feature_extractor = False
             if load_pretrained_feature_extractor:
                 pretrained_model_ckpt = "/workspace/data/vgg.pth"
                 checkpoint = torch.load(pretrained_model_ckpt)
