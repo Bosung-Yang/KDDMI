@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     if args.defense == 'HSIC' or args.defense == 'COCO':
         hp_ac_list = [
-            (0.001,0.001,62.05)
+            (0.001,0.001,63.88)
             # HSIC
             # 1
             # (0.05, 0.5, 80.35),
