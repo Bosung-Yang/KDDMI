@@ -61,7 +61,7 @@ def HSIC(args, trainloader, testloader):
             if load_pretrained_feature_extractor:
                 pretrained_model_ckpt = "/workspace/data/target_model/celeba/NODEF/pretrained_79.33.tar"
                 checkpoint = torch.load(pretrained_model_ckpt)
-                load_feature_extractor(net, checkpoint)
+                #load_feature_extractor(net, checkpoint)
 
         elif model_name == "ResNet":
             net = model.ResNetCls(nclass=n_classes, resnetl=10)
