@@ -62,7 +62,7 @@ def main(args, loaded_args, trainloader, testloader):
         print("a1:", a1, "a2:", a2)
 
         if model_name == "VGG16" or model_name == "reg":
-            net = model.VGG16(n_classes, hsic_training=args.hsic_training, dataset=args.dataset)
+            net = model.VGG16(n_classes, hsic_training=False, dataset=args.dataset)
 
             load_pretrained_feature_extractor = False
             if load_pretrained_feature_extractor:
