@@ -59,7 +59,7 @@ def HSIC(args, trainloader, testloader):
 
             load_pretrained_feature_extractor = True
             if load_pretrained_feature_extractor:
-                pretrained_model_ckpt = "/workspace/data/target_model/celeba/NODEF/pretrained_79.33.tar "
+                pretrained_model_ckpt = "/workspace/data/target_model/celeba/NODEF/pretrained_79.33.tar"
                 checkpoint = torch.load(pretrained_model_ckpt)
                 load_feature_extractor(net, checkpoint)
 
