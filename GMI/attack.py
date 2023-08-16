@@ -132,7 +132,7 @@ if __name__ == '__main__':
     parser.add_argument('--defense', default='vib', help='reg | vib | HSIC')
     parser.add_argument('--save_img_dir', default='./attack_res/')
     parser.add_argument('--success_dir', default='./attack_success')
-    parser.add_argument('--model_path', default='/workspace/data/target_model')
+    parser.add_argument('--model_path', default='./target_model')
     parser.add_argument('--verbose', action='store_true', help='')
     parser.add_argument('--iter', default=3000, type=int)
     parser.add_argument('--box', default='white', type=str)
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     if args.defense == 'HSIC' or args.defense == 'COCO':
         hp_ac_list = [
-            (0.1,0.1,73.48)
+            (0.001,0.001,62.05)
             # HSIC
             # 1
             # (0.05, 0.5, 80.35),
