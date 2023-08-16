@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     if args.defense == 'HSIC' or args.defense == 'COCO':
         hp_ac_list = [
-            (0.01,0.01,63.88),(0.001,0.003,62.05)
+            (0.001,0.003,62.05)
             # HSIC
             # 1
             # (0.05, 0.5, 80.35),
@@ -203,7 +203,7 @@ if __name__ == '__main__':
             #                                       f'attack_res/{args.dataset}/{args.defense}/all/'],
             #                                      50, 1, 2048)
             print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-            print(f'FID:{fid_value:.4f}')
+
 
     else:
             if args.defense == "vib":
