@@ -174,7 +174,7 @@ if __name__ == '__main__':
         ]
         for (a1, a2, ac) in hp_ac_list:
             print("a1:", a1, "a2:", a2, "test_acc:", ac)
-
+            model_name= 'VGG16'
             T = model.VGG16(1000, True)
             T = nn.DataParallel(T).cuda()
 
