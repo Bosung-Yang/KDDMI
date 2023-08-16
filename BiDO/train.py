@@ -155,7 +155,7 @@ def NODEF(args, n_classes, trainloader, testloader):
 
 
     if model_name == "VGG16" or model_name == "reg":
-        net = model.VGG16_V(n_classes)
+        net = model.VGG16(n_classes)
 
     elif model_name == "ResNet":
         net = model.ResNetCls(nclass=n_classes, resnetl=10)
@@ -284,7 +284,7 @@ if __name__ == '__main__':
         VIB(args, train_loader , test_loader)
     if args.defense=='NODEF':
         NODEF(args, 1000, train_loader,test_loader)
-        NODEF(args, 2000, train_loader,test_loader)
+
     if args.defense=='KD':
         KD(args, args.nclass, train_loader, test_loader)
 
