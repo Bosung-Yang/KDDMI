@@ -242,7 +242,7 @@ if __name__ == '__main__':
             elif args.defense == 'nodef':
                 path_T = 'nodef.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
-                T = model.VGG16(num_classes)
+                T = model.VGG16_V(num_classes)
 
                 T = nn.DataParallel(T).cuda()
 
