@@ -127,6 +127,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_path', default='../BiDO/target_model')
     parser.add_argument('--verbose', action='store_true', help='')
     parser.add_argument('--iter', default=3000, type=int)
+    parser.add_argument('--target')
 
     args = parser.parse_args()
 
