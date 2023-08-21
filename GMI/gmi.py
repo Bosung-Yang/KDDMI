@@ -15,8 +15,9 @@ import model, utils
 from utils import save_tensor_images
 
 
+
 def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500,
-              clip_range=1, num_seeds=2, verbose=False):
+              clip_range=1, num_seeds=5, verbose=False):
     iden = iden.view(-1).long().cuda()
     criterion = nn.CrossEntropyLoss().cuda()
     bs = iden.shape[0]
@@ -70,7 +71,7 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                 if (i + 1) % 500 == 0:
                     fake_img = G(z.detach())
 
-                    if args.dataset == 'tceleba':
+                    if args.dataset == 'casdeleba':
                         eval_prob = E(utils.low2high(fake_img))[-1]
                     else:
                         eval_prob = E(fake_img)[-1]
@@ -83,7 +84,7 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                                                                                                         acc))
 
         fake = G(z)
-        if args.dataset == 'tceleba':
+        if args.dataset == 'casdeleba':
             eval_prob = E(utils.low2high(fake))[-1]
         else:
             eval_prob = E(fake)[-1]
