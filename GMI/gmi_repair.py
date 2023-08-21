@@ -159,13 +159,13 @@ if __name__ == '__main__':
         ckp_E = torch.load(e_path)
         E.load_state_dict(ckp_E['state_dict'], strict=False)
 
-        g_path = "./result/models_celeba_gan/celeba_G_300.tar"
+        g_path = "/workspace/data/celeba_G.tar"
         G = generator.Generator()
         G = nn.DataParallel(G).cuda()
         ckp_G = torch.load(g_path)
         G.load_state_dict(ckp_G['state_dict'], strict=False)
 
-        d_path = "./result/models_celeba_gan/celeba_D_300.tar"
+        d_path = "/workspace/data/celeba_D.tar"
         D = discri.DGWGAN()
         D = nn.DataParallel(D).cuda()
         ckp_D = torch.load(d_path)
