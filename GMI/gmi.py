@@ -149,7 +149,7 @@ if __name__ == '__main__':
     ############################# mkdirs ##############################
 
     if args.dataset == 'celeba':
-        model_name = "VGG16"
+
         num_classes = 1000
 
         if args.target == 'nodef' or args.target =='kd':
@@ -161,6 +161,7 @@ if __name__ == '__main__':
         elif args.target =='HSIC':
             e_path = args.target + '.tar'
             E = model.VGG16(num_classes)
+        print(e_path)
 
         #E = nn.DataParallel(E).cuda()
         ckp_E = torch.load(e_path)
@@ -241,6 +242,7 @@ if __name__ == '__main__':
 
             elif args.defense == 'nodef':
                 path_T = 'nodef.tar'
+                print(path_T)
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 
