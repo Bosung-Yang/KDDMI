@@ -176,6 +176,7 @@ if __name__ == '__main__':
         D.load_state_dict(ckp_D['state_dict'], strict=False)
 
         if args.defense == 'HSIC' or args.defense == 'COCO':
+            print('a')
             hp_ac_list = [
                 # HSIC
                 # 1
