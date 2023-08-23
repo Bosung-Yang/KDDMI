@@ -157,7 +157,7 @@ if __name__ == '__main__':
         if args.target == 'VIB':
             E = model.VGG16_vib(num_classes)
         if args.target =='HSIC':
-            E = model.VGG16(num_classes,hsic_trainng=True)
+            E = model.VGG16(num_classes,hsic_training=True)
         e_path = args.target +'_eval.tar'
         E = nn.DataParallel(E).cuda()
         ckp_E = torch.load(e_path)
