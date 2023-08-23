@@ -70,10 +70,8 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                 if (i + 1) % 500 == 0:
                     fake_img = G(z.detach())
 
-                    if args.dataset == 'celeba':
-                        eval_prob = E(utils.low2high(fake_img))[-1]
-                    else:
-                        eval_prob = E(fake_img)[-1]
+
+                    eval_prob = E(fake_img)[-1]
 
                     eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
                     acc = iden.eq(eval_iden.long()).sum().item() * 100.0 / bs
@@ -83,10 +81,8 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                                                                                                         acc))
 
         fake = G(z)
-        if args.dataset == 'celeba':
-            eval_prob = E(utils.low2high(fake))[-1]
-        else:
-            eval_prob = E(fake)[-1]
+
+        eval_prob = E(fake)[-1]
 
         eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
         cnt, cnt5 = 0, 0
