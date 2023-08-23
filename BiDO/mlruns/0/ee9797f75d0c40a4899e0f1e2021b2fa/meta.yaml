@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/ee9797f75d0c40a4899e0f1e2021b2fa/artifacts
+end_time: 1692709511615
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: ee9797f75d0c40a4899e0f1e2021b2fa
+run_name: valuable-turtle-647
+run_uuid: ee9797f75d0c40a4899e0f1e2021b2fa
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692706919183
+status: 3
+tags: []
+user_id: root

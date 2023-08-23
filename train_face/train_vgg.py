@@ -75,7 +75,7 @@ def distillation(y, labels, teacher_scores, T, alpha):
 def train(img, label, model, teacher, encoder, optimizer, mode, temp):
     lossfn = torch.nn.CrossEntropyLoss()
     model.train()
-    teacher.eval()
+    #teacher.eval()
     optimizer.zero_grad()
     
     if 'kd' in mode:
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     parser = ArgumentParser(description='Step1 : Training Face Classifiers')
     parser.add_argument('--gpu')
     parser.add_argument('--epoch',default=10)
-    parser.add_argument('--mode',default='kd')
+    parser.add_argument('--mode',default='none')
     parser.add_argument('--student',default='vgg16')
     parser.add_argument('--teacher',default='vgg16')
     parser.add_argument('--teacher_path',default='./final_pths/vgg16.pth')
@@ -147,9 +147,9 @@ if __name__ == '__main__':
     print(student)
     student = student.cuda()
     print('teacher')
-    teacher = util.get_model(args.teacher, args.num_class)
-    teacher.load_state_dict(torch.load(args.teacher_path))
-    teacjer = teacher.cuda()
+    #teacher = util.get_model(args.teacher, args.num_class)
+    #teacher.load_state_dict(torch.load(args.teacher_path))
+    #teacjer = teacher.cuda()
 
     enc=None
     #optim = torch.optim.Adam(student.parameters(), lr = 0.0001)
@@ -168,7 +168,7 @@ if __name__ == '__main__':
             if 'vib' in args.student:
                 train_vib(img = img, label = label, model = student, teacher = teacher, encoder = enc, optimizer = optim, mode = args.mode)
             else:
-                train(img = img, label = label, model = student, teacher = teacher, encoder = enc, optimizer = optim, mode = args.mode, temp = args.temp)
+                train(img = img, label = label, model = student, teacher = None, encoder = enc, optimizer = optim, mode = args.mode, temp = args.temp)
         answer = 0
         total = 0
         dct_answer = 0

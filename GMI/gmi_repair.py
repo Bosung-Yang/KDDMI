@@ -16,11 +16,11 @@ from utils import save_tensor_images
 
 
 def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500,
-              clip_range=1, num_seeds=5, verbose=False):
+              clip_range=1, num_seeds=2, verbose=False):
     iden = iden.view(-1).long().cuda()
     criterion = nn.CrossEntropyLoss().cuda()
     bs = iden.shape[0]
-
+    
     G.eval()
     D.eval()
     T.eval()
@@ -52,7 +52,7 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
 
             Prior_Loss = - label.mean()
             Iden_Loss = criterion(out, iden)
-            Total_Loss = Prior_Loss + lamda * Iden_Loss
+            Total_Loss =  0.1* Prior_Loss +1000*  Iden_Loss
 
             Total_Loss.backward()
 
@@ -146,15 +146,16 @@ if __name__ == '__main__':
         num_classes = 1000
 
         if args.target == 'nodef' or args.target =='kd':
-            e_path = args.target + '.tar'
+            e_path = 'eval_vgg' + '.tar'
             E = model.VGG16_V(num_classes)
         elif args.target =='vib':
             e_path = args.target + '.tar'
             E = model.VGG16_vib(num_classes)
         elif args.target =='HSIC':
             e_path = args.target + '.tar'
+            e_path = 'hsic5.tar'
             E = model.VGG16(num_classes)
-        print(e_path)
+        print('eval on : '+e_path)
         E = nn.DataParallel(E).cuda()
         ckp_E = torch.load(e_path)
         E.load_state_dict(ckp_E['state_dict'], strict=False)
@@ -175,9 +176,9 @@ if __name__ == '__main__':
             T = model.VGG16(num_classes, True)
             T = nn.DataParallel(T).cuda()
 
-            model_tar = "HSIC.tar"
+            path_T = "hsic5.tar"
 
-            path_T = os.path.join(args.model_path, args.dataset, args.defense, model_tar)
+            print(path_T)
 
             ckp_T = torch.load(path_T)
             T.load_state_dict(ckp_T['state_dict'], strict=False)
@@ -217,15 +218,12 @@ if __name__ == '__main__':
                     iden = torch.from_numpy(np.arange(ids_per_time))
                     for idx in range(times):
                         print("--------------------- Attack batch [%s]------------------------------" % idx)
-                        res = inversion(args, G, D, T, E, iden, iter_times=2000, verbose=True)
+                        res = inversion(args, G, D, T, E, iden, iter_times=1300, verbose=False)
                         res_all.append(res)
                         iden = iden + ids_per_time
 
                     res = np.array(res_all).mean(0)
-                    fid_value = calculate_fid_given_paths(args.dataset,
-                                                          [f'attack_res/{args.dataset}/trainset/',
-                                                           f'attack_res/{args.dataset}/{args.defense}/all/'],
-                                                          50, 1, 2048)
+                    
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
                     print(f'FID:{fid_value:.4f}')
 

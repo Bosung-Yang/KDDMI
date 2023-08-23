@@ -14,9 +14,8 @@ def test(model, criterion, dataloader):
     tf = time.time()
     model.eval()
     loss, cnt, ACC = 0.0, 0, 0
-    pbar = tqdm(enumerate(dataloader),total = len(dataloader),ncols=150)
-    for _, data in pbar:
-        img, iden = data
+    
+    for img,iden  in dataloader:
         img, iden = img.to(device), iden.to(device)
         bs = img.size(0)
         iden = iden.view(-1)

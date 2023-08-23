@@ -40,13 +40,14 @@ def load_feature_extractor(net, state_dict):
         if "num_batches_tracked" in new_name:
             continue
         # print(name, '---', new_name)
+        
         net_state[name].copy_(mew_param.data)
 
 
 def HSIC(args, trainloader, testloader):
     n_classes = 1000
     hp_list = [
-                 (0.01, 0.00),(0.00, 0.01),
+                 (0.5,0.5), (0.1,0.1)
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -59,9 +60,11 @@ def HSIC(args, trainloader, testloader):
 
             load_pretrained_feature_extractor = True
             if load_pretrained_feature_extractor:
-                pretrained_model_ckpt = "/workspace/data/target_model/celeba/NODEF/pretrained_79.33.tar"
+                print('use')
+                pretrained_model_ckpt = "./model.pth"
                 checkpoint = torch.load(pretrained_model_ckpt)
-                #load_feature_extractor(net, checkpoint)
+                load_feature_extractor(net,checkpoint)
+                #net.load_state_dict(checkpoint['state_dict'],strict=False)
 
         elif model_name == "ResNet":
             net = model.ResNetCls(nclass=n_classes, resnetl=10)
@@ -86,7 +89,7 @@ def HSIC(args, trainloader, testloader):
             train_loss, train_acc = engine.train_HSIC(net, criterion, optimizer, trainloader, a1, a2, n_classes,
                                                       ktype='linear',
                                                       hsic_training=True)
-            test_loss, test_acc = engine.test_HSIC(net, criterion, testloader, a1, a2, n_classes, ktype='gaussian',
+            test_loss, test_acc = engine.test_HSIC(net, criterion, testloader, a1, a2, n_classes, ktype='linear',
                                                    hsic_training=True)
 
             if test_acc > best_ACC:
@@ -155,12 +158,12 @@ def NODEF(args, n_classes, trainloader, testloader):
 
 
     if model_name == "VGG16" or model_name == "reg":
-        net = model.VGG16(n_classes,hsic_training=True)
+        net = model.VGG16(n_classes,hsic_training=False)
 
     elif model_name == "ResNet":
         net = model.ResNetCls(nclass=n_classes, resnetl=10)
 
-    optimizer = torch.optim.SGD(net.parameters(), lr)
+    optimizer = torch.optim.Adam(net.parameters(), lr)
 
     net = torch.nn.DataParallel(net).to(device)
 
@@ -172,7 +175,7 @@ def NODEF(args, n_classes, trainloader, testloader):
         if test_acc > best_ACC:
             best_ACC = test_acc
             best_model = deepcopy(net)
-
+        print(test_acc)
 
     print("best acc:", best_ACC)
     mlflow.log_metric("accuracy", best_ACC)
@@ -217,6 +220,7 @@ def KD(args, n_classes, trainloader, testloader):
             print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
             train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
             test_acc = engine.test(net, criterion, testloader)
+            print(test_acc)
             if test_acc > best_ACC:
                 best_ACC = test_acc
                 best_model = deepcopy(net)

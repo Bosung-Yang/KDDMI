@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/24293d9ae94542098bce1ee430cfea5f/artifacts
+end_time: 1692727485412
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 24293d9ae94542098bce1ee430cfea5f
+run_name: crawling-crane-180
+run_uuid: 24293d9ae94542098bce1ee430cfea5f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692724906625
+status: 3
+tags: []
+user_id: root

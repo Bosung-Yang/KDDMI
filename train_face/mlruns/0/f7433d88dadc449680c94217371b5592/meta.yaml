@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/train_face/mlruns/0/f7433d88dadc449680c94217371b5592/artifacts
+end_time: 1692701260996
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: f7433d88dadc449680c94217371b5592
+run_name: chill-owl-867
+run_uuid: f7433d88dadc449680c94217371b5592
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692701260988
+status: 3
+tags: []
+user_id: root

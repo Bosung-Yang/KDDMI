@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/899612b5143d4171857e34d5a2ee6412/artifacts
+end_time: 1692704293665
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 899612b5143d4171857e34d5a2ee6412
+run_name: chill-fox-947
+run_uuid: 899612b5143d4171857e34d5a2ee6412
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692704239729
+status: 3
+tags: []
+user_id: root
