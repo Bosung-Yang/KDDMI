@@ -25,7 +25,7 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
     D.eval()
     T.eval()
     E.eval()
-
+    E = T
     flag = torch.zeros(bs)
 
     res = []
