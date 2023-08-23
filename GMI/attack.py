@@ -176,7 +176,7 @@ if __name__ == '__main__':
         D.load_state_dict(ckp_D['state_dict'], strict=False)
 
         if args.defense == 'HSIC' or args.defense == 'COCO':
-            print('a')
+            
             hp_ac_list = [
                 # HSIC
                 # 1
@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'], strict=False)
-
+                print('a')
                 res_all = []
                 ids = 300
                 times = 5
