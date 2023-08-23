@@ -178,15 +178,9 @@ if __name__ == '__main__':
         if args.defense == 'HSIC' or args.defense == 'COCO':
             
             hp_ac_list = [
-                # HSIC
-                # 1
-                # (0.05, 0.5, 80.35),
-                # (0.05, 1.0, 70.08),
-                # (0.05, 2.5, 56.18),
-                # 2
-                # (0.05, 0.5, 78.89),
-                # (0.05, 1.0, 69.68),
-                # (0.05, 2.5, 56.62),
+
+                (0.05, 0.5, 80.35),
+
             ]
             for (a1, a2, ac) in hp_ac_list:
                 print("a1:", a1, "a2:", a2, "test_acc:", ac)
@@ -198,7 +192,7 @@ if __name__ == '__main__':
 
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'], strict=False)
-                print('a')
+                
                 res_all = []
                 ids = 300
                 times = 5
