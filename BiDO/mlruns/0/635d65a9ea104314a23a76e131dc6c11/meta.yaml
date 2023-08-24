@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/635d65a9ea104314a23a76e131dc6c11/artifacts
+end_time: 1692882839709
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 635d65a9ea104314a23a76e131dc6c11
+run_name: gifted-shrew-854
+run_uuid: 635d65a9ea104314a23a76e131dc6c11
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692882839583
+status: 3
+tags: []
+user_id: root
