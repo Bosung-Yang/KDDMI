@@ -4,10 +4,10 @@ import torch.nn as nn
 from torch.optim.lr_scheduler import MultiStepLR
 from util import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
 from copy import deepcopy
-from torchvision import transforms, datasets
+
 device = "cuda"
-#sys.path.append('../VMI/')
-#from csv_logger import CSVLogger, plot_csv
+sys.path.append('../VMI/')
+from csv_logger import CSVLogger, plot_csv
 
 
 def main(args, loaded_args, trainloader, testloader):
@@ -26,14 +26,16 @@ def main(args, loaded_args, trainloader, testloader):
             net = model.SCNN(10)
 
     elif args.dataset == 'celeba':
-        lr = 1e-3
+        lr = 1e-2
         n_epochs = 50
         if model_name == "VGG16":
-            net = model.IR50(n_classes)
+            net = model.VGG16(n_classes)
 
-    optimizer = torch.optim.Adam(params=net.parameters(),
+    optimizer = torch.optim.SGD(params=net.parameters(),
                                 lr=lr,
+                                momentum=momentum,
                                 weight_decay=weight_decay,
+                                nesterov=True
                                 )
 
     scheduler = MultiStepLR(optimizer, milestones, gamma=0.2)
@@ -44,14 +46,18 @@ def main(args, loaded_args, trainloader, testloader):
     ################## viz ######################
     args.output_dir = os.path.join(args.model_dir, args.dataset, args.defense)
     os.makedirs(args.output_dir, exist_ok=True)
-
-
+    epoch_fieldnames = ['global_iteration', 'train_loss', 'train_acc', 'test_loss', 'test_acc']
+    epoch_logger = CSVLogger(every=1,
+                             fieldnames=epoch_fieldnames,
+                             filename=os.path.join(
+                                 args.output_dir, f'epoch_log.csv'),
+                             resume=0)
     ################## viz ######################
     best_acc = -1
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
-        train_loss, train_acc = engine.train(net, criterion, optimizer, trainloader)
-        test_acc = engine.test(net, criterion, testloader)
+        train_loss, train_acc = engine.train_reg(net, criterion, optimizer, trainloader)
+        test_loss, test_acc = engine.test_reg(net, criterion, testloader)
 
         if test_acc > best_acc:
             best_acc = test_acc
@@ -60,7 +66,16 @@ def main(args, loaded_args, trainloader, testloader):
         scheduler.step()
 
         ################################### viz ####################################
-
+        if epoch % 1 == 0:
+            epoch_logger.writerow({
+                'global_iteration': epoch,
+                'train_loss': train_loss,
+                'train_acc': train_acc,
+                'test_loss': test_loss,
+                'test_acc': test_acc,
+            })
+            plot_csv(epoch_logger.filename, os.path.join(args.output_dir, f'epoch_plots.jpeg'))
+        ################################### viz ####################################
 
     print("best acc:", best_acc)
     utils.save_checkpoint({
@@ -85,29 +100,10 @@ if __name__ == '__main__':
     file = os.path.join(args.config_dir, args.dataset + ".json")
     loaded_args = utils.load_json(json_file=file)
 
-    data_path = '/workspace/data/'
-    batch_size = 64
-    train_folder = 'train/'
-    test_folder = 'test/'
-    image_transforms = {
-        'train': transforms.Compose([
-            transforms.CenterCrop((128,128)),
-            transforms.Resize(64),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
-        ]),
-        'test': transforms.Compose([
-            transforms.CenterCrop((128,128)),
-            transforms.Resize(64),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
-        ])
-    }
-    train_images = datasets.ImageFolder(data_path+train_folder,image_transforms['train'])
-    train_loader = torch.utils.data.DataLoader(train_images, batch_size = 64 ,num_workers=4,shuffle=True)
-    test_images = datasets.ImageFolder(data_path+test_folder,image_transforms['test'])
-    test_loader = torch.utils.data.DataLoader(test_images, batch_size = 60 ,num_workers=4,shuffle=False) 
- 
+    train_file = loaded_args['dataset']['train_file']
+    test_file = loaded_args['dataset']['test_file']
+    trainloader = utils.init_dataloader(loaded_args, train_file, mode="train")
+    testloader = utils.init_dataloader(loaded_args, test_file, mode="test")
 
-    main(args, loaded_args, train_loader, test_loader)
+    main(args, loaded_args, trainloader, testloader)
 

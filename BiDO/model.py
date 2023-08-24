@@ -361,7 +361,7 @@ class VGG16(nn.Module):
             hiddens.append(feature)
 
             res = self.fc_layer(feature)
-            res = F.softmax(res,dim=1)
+
             return hiddens, res
 
         else:
@@ -370,7 +370,7 @@ class VGG16(nn.Module):
             feature = self.bn(feature)
 
             res = self.fc_layer(feature)
-            #res = F.softmax(res,dim=1)
+
             return feature, res
 
     def predict(self, x):
@@ -381,98 +381,8 @@ class VGG16(nn.Module):
         out = F.softmax(res, dim=1)
 
         return out
-    
-class VGG16_(nn.Module):
-    def __init__(self, n_classes):
-        super(VGG16_, self).__init__()
-        model = torchvision.models.vgg16_bn(pretrained=True)
-        self.feature = model.features
-        self.feat_dim = 512 * 2 * 2
-        self.n_classes = n_classes
-        self.bn = nn.BatchNorm1d(self.feat_dim)
-        self.bn.bias.requires_grad_(False)  # no shift
-        self.fc_layer = nn.Linear(self.feat_dim, self.n_classes)
-            
-    def forward(self, x):
-        feature = self.feature(x)
-        feature = feature.view(feature.size(0), -1)
-        feature = self.bn(feature)
-        res = self.fc_layer(feature)
-        
-        return [feature, res]
-    
-class VGG16_softmax(nn.Module):
-    def __init__(self, n_classes, hsic_training=False, dp_training=False, dataset='celeba'):
-        super(VGG16, self).__init__()
 
-        self.hsic_training = hsic_training
 
-        if self.hsic_training:
-            blocks = make_layers(cfgs['D'], batch_norm=True)
-            self.layer1 = blocks[0]
-            self.layer2 = blocks[1]
-            self.layer3 = blocks[2]
-            self.layer4 = blocks[3]
-            self.layer5 = blocks[4]
-
-        else:
-            model = torchvision.models.vgg16_bn(pretrained=True)
-            self.feature = model.features
-
-        if dataset == 'celeba':
-            self.feat_dim = 512 * 2 * 2
-        else:
-            self.feat_dim = 512
-        self.n_classes = n_classes
-        self.bn = nn.BatchNorm1d(self.feat_dim)
-        if not dp_training:
-            self.bn.bias.requires_grad_(False)  # no shift
-        self.fc_layer = nn.Linear(self.feat_dim, self.n_classes)
-
-    def forward(self, x):
-        if self.hsic_training:
-            hiddens = []
-
-            out = self.layer1(x)
-            hiddens.append(out)
-
-            out = self.layer2(out)
-            hiddens.append(out)
-
-            out = self.layer3(out)
-            hiddens.append(out)
-
-            out = self.layer4(out)
-            hiddens.append(out)
-
-            feature = self.layer5(out)
-            feature = feature.view(feature.size(0), -1)
-            feature = self.bn(feature)
-
-            hiddens.append(feature)
-
-            res = self.fc_layer(feature)
-            res = F.softmax(res, dim=1)
-            return hiddens, res
-
-        else:
-            feature = self.feature(x)
-            feature = feature.view(feature.size(0), -1)
-            feature = self.bn(feature)
-
-            res = self.fc_layer(feature)
-            res = F.softmax(res, dim=1)
-            return feature, res
-
-    def predict(self, x):
-        feature = self.feature(x)
-        feature = feature.view(feature.size(0), -1)
-        feature = self.bn(feature)
-        res = self.fc_layer(feature)
-        out = F.softmax(res, dim=1)
-
-        return out
-    
 class VGG16_vib(nn.Module):
     def __init__(self, n_classes, dataset='celeba'):
         super(VGG16_vib, self).__init__()
@@ -869,44 +779,3 @@ class FaceNet64(nn.Module):
         return feat, out, iden
 
 ############################################ FaceNet ###################################################
-
-
-# My_implementations
-class VGG16_V(nn.Module):
-    def __init__(self, n_classes):
-        super(VGG16_V, self).__init__()
-        model = torchvision.models.vgg16_bn(pretrained=True)
-        self.feature = model.features
-        self.feat_dim = 512 * 2 * 2
-        self.n_classes = n_classes
-        self.bn = nn.BatchNorm1d(self.feat_dim)
-        self.bn.bias.requires_grad_(False)  # no shift
-        self.fc_layer = nn.Linear(self.feat_dim, self.n_classes)
-            
-    def forward(self, x):
-        feature = self.feature(x)
-        feature = feature.view(feature.size(0), -1)
-        feature = self.bn(feature)
-        res = self.fc_layer(feature)
-        
-        return [feature, res]
-
-class VGG16_VS(nn.Module):
-    def __init__(self, n_classes):
-        super(VGG16_VS, self).__init__()
-        model = torchvision.models.vgg16_bn(pretrained=True)
-        self.feature = model.features
-        self.feat_dim = 512 * 2 * 2
-        self.n_classes = n_classes
-        self.bn = nn.BatchNorm1d(self.feat_dim)
-        self.bn.bias.requires_grad_(False)  # no shift
-        self.fc_layer = nn.Linear(self.feat_dim, self.n_classes)
-            
-    def forward(self, x):
-        feature = self.feature(x)
-        feature = feature.view(feature.size(0), -1)
-        feature = self.bn(feature)
-        res = self.fc_layer(feature)
-        res = F.softmax(res,dim=1)
-        
-        return [feature, res]

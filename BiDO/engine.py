@@ -14,18 +14,18 @@ def test(model, criterion, dataloader):
     tf = time.time()
     model.eval()
     loss, cnt, ACC = 0.0, 0, 0
-    
-    for img,iden  in dataloader:
+
+    for img, iden in dataloader:
         img, iden = img.to(device), iden.to(device)
         bs = img.size(0)
         iden = iden.view(-1)
+
         out_digit = model(img)[-1]
         out_iden = torch.argmax(out_digit, dim=1).view(-1)
-        ACC += torch.sum(iden == out_iden)
-        cnt+=bs
-                         
-    return ACC * 100.0 / cnt
+        ACC += torch.sum(iden == out_iden).item()
+        cnt += bs
 
+    return ACC * 100.0 / cnt
 
 
 def multilayer_hsic(model, criterion, inputs, target, a1, a2, n_classes, ktype, hsic_training, measure):
@@ -210,6 +210,108 @@ def test_HSIC(model, criterion, testloader, a1, a2, n_classes, ktype='gaussian',
     print('-' * 80)
     return losses.avg, top1.avg
 
+
+def train_reg(model, criterion, optimizer, trainloader):
+    model.train()
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    top1 = AverageMeter()
+    top5 = AverageMeter()
+    loss_cls = AverageMeter()
+    end = time.time()
+
+    pbar = tqdm(enumerate(trainloader), total=len(trainloader), ncols=150)
+
+    for batch_idx, (inputs, iden) in pbar:
+        inputs, iden = inputs.to(device), iden.to(device)
+        iden = iden.view(-1)
+
+        feats, out_digit = model(inputs)
+        cross_loss = criterion(out_digit, iden)
+        # triplet_loss = triplet(feats, iden)
+        loss = cross_loss
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # measure accuracy and record loss
+        bs = inputs.size(0)
+        prec1, prec5 = accuracy(out_digit.data, iden.data, topk=(1, 5))
+        losses.update(loss.item(), bs)
+        loss_cls.update(cross_loss.item(), bs)
+
+        top1.update(prec1.item(), bs)
+        top5.update(prec5.item(), bs)
+
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        # plot progress
+        msg = '({batch}/{size}) | ' \
+              'Loss:{loss:.4f} | ' \
+              'top1:{top1: .4f} | top5:{top5: .4f}'.format(
+            batch=batch_idx + 1,
+            size=len(trainloader),
+            cls=loss_cls.avg,
+            loss=losses.avg,
+            top1=top1.avg,
+            top5=top5.avg,
+        )
+        pbar.set_description(msg)
+
+    return losses.avg, top1.avg
+
+
+def test_reg(model, criterion, testloader):
+    model.eval()
+    batch_time = AverageMeter()
+    data_time = AverageMeter()
+    losses = AverageMeter()
+    top1 = AverageMeter()
+    top5 = AverageMeter()
+    end = time.time()
+
+    pbar = tqdm(enumerate(testloader), total=len(testloader), ncols=150)
+
+    with torch.no_grad():
+        for batch_idx, (inputs, iden) in pbar:
+            data_time.update(time.time() - end)
+
+            inputs, iden = inputs.to(device), iden.to(device)
+            bs = inputs.size(0)
+            iden = iden.view(-1)
+            feats, out_digit = model(inputs)
+            cross_loss = criterion(out_digit, iden)
+
+            loss = cross_loss
+
+            # measure accuracy and record loss
+            prec1, prec5 = accuracy(out_digit.data, iden.data, topk=(1, 5))
+            losses.update(loss.item(), bs)
+            top1.update(prec1.item(), bs)
+            top5.update(prec5.item(), bs)
+
+            # measure elapsed time
+            batch_time.update(time.time() - end)
+            end = time.time()
+
+            # plot progress
+            # plot progress
+            msg = '({batch}/{size}) | ' \
+                  'Loss:{loss:.4f} | ' \
+                  'top1:{top1: .4f} | top5:{top5: .4f}'.format(
+                batch=batch_idx + 1,
+                size=len(testloader),
+                loss=losses.avg,
+                top1=top1.avg,
+                top5=top5.avg,
+            )
+            pbar.set_description(msg)
+
+    return losses.avg, top1.avg
+
+
 def train_vib(model, criterion, optimizer, trainloader, beta=1e-2):
     # switch to train mode
     model.train()
@@ -315,104 +417,4 @@ def test_vib(model, criterion, testloader, beta=1e-2):
                 top5=top5.avg,
             )
             pbar.set_description(msg)
-    return losses.avg, top1.avg
-
-
-def train(model, criterion, optimizer, trainloader):
-    model.train()
-    batch_time = AverageMeter()
-    losses = AverageMeter()
-    top1 = AverageMeter()
-    top5 = AverageMeter()
-    loss_cls = AverageMeter()
-    end = time.time()
-
-    pbar = tqdm(enumerate(trainloader), total=len(trainloader), ncols=150)
-
-    for batch_idx, (inputs, iden) in pbar:
-        inputs, iden = inputs.to(device), iden.to(device)
-        #iden = iden.view(-1)
-
-        feats, label = model(inputs)
-        cross_loss = criterion(label, iden)
-        # triplet_loss = triplet(feats, iden)
-        loss = cross_loss
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        # measure accuracy and record loss
-        bs = inputs.size(0)
-        prec1, prec5 = accuracy(label.data, iden.data, topk=(1, 5))
-        losses.update(loss.item(), bs)
-
-        top1.update(prec1.item(), bs)
-        top5.update(prec5.item(), bs)
-
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-        # plot progress
-        msg = '({batch}/{size}) | ' \
-              'Loss:{loss:.4f} | ' \
-              'top1:{top1: .4f} | top5:{top5: .4f}'.format(
-            batch=batch_idx + 1,
-            size=len(trainloader),
-            loss=losses.avg,
-            top1=top1.avg,
-            top5=top5.avg,
-        )
-        pbar.set_description(msg)
-
-    return losses.avg, top1.avg
-
-def train_kd(model,teacher, criterion, optimizer, trainloader):
-    model.train()
-    teacher.eval()
-    batch_time = AverageMeter()
-    losses = AverageMeter()
-    top1 = AverageMeter()
-    top5 = AverageMeter()
-    loss_cls = AverageMeter()
-    end = time.time()
-
-    pbar = tqdm(enumerate(trainloader), total=len(trainloader), ncols=150)
-
-    for batch_idx, (inputs, iden) in pbar:
-        inputs, iden = inputs.to(device), iden.to(device)
-        #iden = iden.view(-1)
-
-        feats, label = model(inputs)
-        feats, tlabel = teacher(inputs)
-        cross_loss = criterion(label, iden, tlabel, 0,0)
-        loss = cross_loss
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        # measure accuracy and record loss
-        bs = inputs.size(0)
-        prec1, prec5 = accuracy(label.data, iden.data, topk=(1, 5))
-        losses.update(loss.item(), bs)
-
-        top1.update(prec1.item(), bs)
-        top5.update(prec5.item(), bs)
-
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-        # plot progress
-        msg = '({batch}/{size}) | ' \
-              'Loss:{loss:.4f} | ' \
-              'top1:{top1: .4f} | top5:{top5: .4f}'.format(
-            batch=batch_idx + 1,
-            size=len(trainloader),
-            loss=losses.avg,
-            top1=top1.avg,
-            top5=top5.avg,
-        )
-        pbar.set_description(msg)
-
     return losses.avg, top1.avg
