@@ -5,7 +5,9 @@ import statistics
 from argparse import ArgumentParser
 from fid_score import calculate_fid_given_paths
 from fid_score_raw import calculate_fid_given_paths0
-
+import mlflow.pytorch
+from mlflow.models import infer_signature
+import mlflow
 device = "cuda"
 
 import sys
@@ -225,9 +227,7 @@ if __name__ == '__main__':
         else:
             if args.defense == "vib":
                 path_T_list = [
-                    os.path.join(args.model_path, args.dataset, args.defense, "VGG16_beta0.003_77.59.tar"),
-                    os.path.join(args.model_path, args.dataset, args.defense, "VGG16_beta0.010_67.72.tar"),
-                    os.path.join(args.model_path, args.dataset, args.defense, "VGG16_beta0.020_59.24.tar"),
+                    'VIB.tar'
                 ]
                 for path_T in path_T_list:
                     T = model.VGG16_vib(num_classes)
@@ -249,12 +249,8 @@ if __name__ == '__main__':
                         iden = iden + ids_per_time
 
                     res = np.array(res_all).mean(0)
-                    fid_value = calculate_fid_given_paths(args.dataset,
-                                                          [f'attack_res/{args.dataset}/trainset/',
-                                                           f'attack_res/{args.dataset}/{args.defense}/all/'],
-                                                          50, 1, 2048)
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-                    print(f'FID:{fid_value:.4f}')
+
 
             elif args.defense == 'VGG16':
                 path_T = 'VGG16.tar'
@@ -279,65 +275,8 @@ if __name__ == '__main__':
                     iden = iden + ids_per_time
 
                 res = np.array(res_all).mean(0)
-                fid_value = calculate_fid_given_paths(args.dataset,
-                                                      [f'attack_res/{args.dataset}/trainset/',
-                                                       f'attack_res/{args.dataset}/{args.defense}/all/'],
-                                                      50, 1, 2048)
                 print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-                print(f'FID:{fid_value:.4f}')
-
-    elif args.dataset == 'mnist':
-        num_classes = 5
-
-        e_path = os.path.join(eval_path, "SCNN_99.28.tar")
-        E = model.SCNN(10)
-        E = nn.DataParallel(E).cuda()
-        ckp_E = torch.load(e_path)
-        E.load_state_dict(ckp_E['state_dict'])
-        g_path = "./result/models_mnist_gan/mnist_G_300.tar"
-        G = generator.GeneratorMNIST()
-        G = nn.DataParallel(G).cuda()
-        ckp_G = torch.load(g_path)
-        G.load_state_dict(ckp_G['state_dict'])
-
-        d_path = "./result/models_mnist_gan/mnist_D_300.tar"
-        D = discri.DGWGAN32()
-        D = nn.DataParallel(D).cuda()
-        ckp_D = torch.load(d_path)
-        D.load_state_dict(ckp_D['state_dict'])
-
-        if args.defense == "HSIC":
-            pass
-        else:
-            if args.defense == "vib":
-                T = model.MCNN_vib(num_classes)
-            elif args.defense == 'reg':
-                path_T = os.path.join(args.model_path, args.dataset, args.defense, "MCNN_reg_99.94.tar")
-                T = model.MCNN(num_classes)
-
-            T = nn.DataParallel(T).cuda()
-            checkpoint = torch.load(path_T)
-            ckp_T = torch.load(path_T)
-            T.load_state_dict(ckp_T['state_dict'])
-
-            aver_acc, aver_acc5, aver_var, aver_var5 = 0, 0, 0, 0
-            K = 1
-            for i in range(K):
-                if args.verbose:
-                    print('-------------------------')
-                iden = torch.from_numpy(np.arange(5))
-                acc, acc5, var, var5 = inversion(args, G, D, T, E, iden, lr=0.01, lamda=100,
-                                                 iter_times=args.iter, num_seeds=100, verbose=args.verbose)
-                aver_acc += acc / K
-                aver_acc5 += acc5 / K
-                aver_var += var / K
-                aver_var5 += var5 / K
-
-                os.system(
-                    "cd attack_res/pytorch-fid/ && python fid_score.py ../mnist/trainset/ ../mnist/HSIC/all/ --dataset=mnist")
-
-            print("Average Acc:{:.2f}\tAverage Acc5:{:.2f}\tAverage Acc_var:{:.4f}\tAverage Acc_var5:{:.4f}".format(
-                aver_acc,
-                aver_acc5,
-                aver_var,
-                aver_var5, ))
+            mlflow.log_metric("Top1", res[0])
+            mlflow.log_metric('top1-std', res[2])
+            mlflow.log_metric("Top5", res[1])
+            mlflow.log_metric('top5_std', res[4])

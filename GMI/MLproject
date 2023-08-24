@@ -1,0 +1,15 @@
+name: inversion
+
+python_env: python_env.yaml
+
+entry_points:
+  main:
+    parameters:
+      defense: {type: string, default: 'VGG16'}
+      target : {type: string, default: 'VGG16'}
+
+
+    command: |
+          python attack.py \
+            --defense {defense} \
+            --target {target} \
