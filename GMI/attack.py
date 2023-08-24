@@ -153,13 +153,13 @@ if __name__ == '__main__':
         num_classes = 1000
         if args.target=='HSIC':
             T = model.VGG16(num_classes)
-            path_T = './HSIC.tar'
+            path_T = './HSIC_eval.tar'
         elif args.target == 'vib':
             T = model.VGG16_vib(num_classes)
-            ath_T = './VIB.tar'
+            ath_T = './VIB_eval.tar'
         elif args.target =='VGG16':
             T = model.VGG16_V(num_classes)
-            ath_T = './VGG16.tar'
+            ath_T = './VGG16_eval.tar'
         elif args.target =='KD':
             T = model.VGG16_V(num_classes)
             ath_T = './KD.tar'

@@ -47,7 +47,7 @@ def load_feature_extractor(net, state_dict):
 def HSIC(args, trainloader, testloader):
     n_classes = 1000
     hp_list = [
-                 (0.05,0.5)
+                 (0.05,0.5), (0.1,0.1)
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
