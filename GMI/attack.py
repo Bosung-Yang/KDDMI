@@ -152,22 +152,22 @@ if __name__ == '__main__':
         model_name = "VGG16"
         num_classes = 1000
         if args.target=='HSIC':
-            T = model.VGG16(num_classes)
-            path_T = './HSIC_eval.tar'
+            E = model.VGG16(num_classes,True)
+            path_E = './HSIC.tar'
         elif args.target == 'vib':
-            T = model.VGG16_vib(num_classes)
-            ath_T = './VIB_eval.tar'
+            E = model.VGG16_vib(num_classes)
+            path_E = './VIB_eval.tar'
         elif args.target =='VGG16':
-            T = model.VGG16_V(num_classes)
-            ath_T = './VGG16_eval.tar'
+            E = model.VGG16_V(num_classes)
+            path_E = './VGG16_eval.tar'
         elif args.target =='KD':
-            T = model.VGG16_V(num_classes)
-            ath_T = './KD.tar'
-        T = nn.DataParallel(T).cuda()
+            E = model.VGG16_V(num_classes)
+            path_E = './KD.tar'
+        E = nn.DataParallel(E).cuda()
 
-        checkpoint = torch.load(path_T)
-        ckp_T = torch.load(path_T)
-        T.load_state_dict(ckp_T['state_dict'])
+        checkpoint = torch.load(path_E)
+        ckp_E = torch.load(path_E)
+        E.load_state_dict(ckp_E['state_dict'])
         
         g_path = "./G.tar"
         G = generator.Generator()
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'], strict=False)
-                
+                        
                 res_all = []
                 ids = 300
                 times = 5
@@ -256,10 +256,10 @@ if __name__ == '__main__':
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
                     print(f'FID:{fid_value:.4f}')
 
-            elif args.defense == 'reg':
-                path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_85.87.tar")
+            elif args.defense == 'VGG16':
+                path_T = 'VGG16.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
-                T = model.VGG16(num_classes)
+                T = model.VGG16_V(num_classes)
 
                 T = nn.DataParallel(T).cuda()
 
