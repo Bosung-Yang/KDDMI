@@ -134,6 +134,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_path', default='../BiDO/target_model')
     parser.add_argument('--verbose', action='store_true', help='')
     parser.add_argument('--iter', default=3000, type=int)
+    parser.add_argument('--target')
 
     args = parser.parse_args()
 
@@ -150,7 +151,24 @@ if __name__ == '__main__':
     if args.dataset == 'celeba':
         model_name = "VGG16"
         num_classes = 1000
+        if args.target=='HSIC':
+            T = model.VGG16(num_classes)
+            path_T = './HSIC.tar'
+        elif args.target == 'vib':
+            T = model.VGG16_vib(num_classes)
+            ath_T = './VIB.tar'
+        elif args.target =='VGG16':
+            T = model.VGG16_V(num_classes)
+            ath_T = './VGG16.tar'
+        elif args.target =='KD':
+            T = model.VGG16_V(num_classes)
+            ath_T = './KD.tar'
+        T = nn.DataParallel(T).cuda()
 
+        checkpoint = torch.load(path_T)
+        ckp_T = torch.load(path_T)
+        T.load_state_dict(ckp_T['state_dict'])
+        
         g_path = "./G.tar"
         G = generator.Generator()
         G = nn.DataParallel(G).cuda()
@@ -187,7 +205,7 @@ if __name__ == '__main__':
 
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'], strict=False)
-                E=T
+                
                 res_all = []
                 ids = 300
                 times = 5
