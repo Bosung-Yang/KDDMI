@@ -151,7 +151,7 @@ def VIB(args,trainloader, testloader):
 
 def NODEF(args, n_classes, trainloader, testloader):
     model_name = 'VGG16'
-    n_epochs = 100
+    n_epochs = 50
     lr = 0.0001
 
     criterion = nn.CrossEntropyLoss().cuda()

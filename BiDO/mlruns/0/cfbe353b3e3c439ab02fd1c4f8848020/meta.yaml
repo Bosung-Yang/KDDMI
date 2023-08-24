@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/cfbe353b3e3c439ab02fd1c4f8848020/artifacts
+end_time: 1692880383671
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: cfbe353b3e3c439ab02fd1c4f8848020
+run_name: bustling-cow-899
+run_uuid: cfbe353b3e3c439ab02fd1c4f8848020
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692880383517
+status: 3
+tags: []
+user_id: root

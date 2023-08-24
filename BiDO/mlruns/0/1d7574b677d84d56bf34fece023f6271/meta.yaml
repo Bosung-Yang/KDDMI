@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/BiDO/mlruns/0/1d7574b677d84d56bf34fece023f6271/artifacts
+end_time: 1692858876270
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 1d7574b677d84d56bf34fece023f6271
+run_name: sassy-doe-162
+run_uuid: 1d7574b677d84d56bf34fece023f6271
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692858876131
+status: 3
+tags: []
+user_id: root
