@@ -47,7 +47,7 @@ def load_feature_extractor(net, state_dict):
 def HSIC(args, trainloader, testloader):
     n_classes = 1000
     hp_list = [
-                 (0.5,0.5), (0.1,0.1)
+                 (0.05,0.5)
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -58,7 +58,7 @@ def HSIC(args, trainloader, testloader):
         if model_name == "VGG16" or model_name == "reg":
             net = model.VGG16(n_classes,hsic_training=True)
 
-            load_pretrained_feature_extractor = True
+            load_pretrained_feature_extractor = False
             if load_pretrained_feature_extractor:
                 print('use')
                 pretrained_model_ckpt = "./model.pth"

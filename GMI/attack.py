@@ -25,7 +25,7 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
     D.eval()
     T.eval()
     E.eval()
-    E = T
+
     flag = torch.zeros(bs)
 
     res = []
@@ -70,8 +70,10 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                 if (i + 1) % 500 == 0:
                     fake_img = G(z.detach())
 
-
-                    eval_prob = E(fake_img)[-1]
+                    if args.dataset == 'asdasdasceleba':
+                        eval_prob = E(utils.low2high(fake_img))[-1]
+                    else:
+                        eval_prob = E(fake_img)[-1]
 
                     eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
                     acc = iden.eq(eval_iden.long()).sum().item() * 100.0 / bs
@@ -81,8 +83,10 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                                                                                                         acc))
 
         fake = G(z)
-
-        eval_prob = E(fake)[-1]
+        if args.dataset == 'celsdasdeba':
+            eval_prob = E(utils.low2high(fake))[-1]
+        else:
+            eval_prob = E(fake)[-1]
 
         eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
         cnt, cnt5 = 0, 0
@@ -130,7 +134,6 @@ if __name__ == '__main__':
     parser.add_argument('--model_path', default='../BiDO/target_model')
     parser.add_argument('--verbose', action='store_true', help='')
     parser.add_argument('--iter', default=3000, type=int)
-    parser.add_argument('--target', default='VGG16')
 
     args = parser.parse_args()
 
@@ -148,17 +151,6 @@ if __name__ == '__main__':
         model_name = "VGG16"
         num_classes = 1000
 
-        if args.target == 'VGG16':
-            E = model.VGG16_V(num_classes)
-        if args.target == 'VIB':
-            E = model.VGG16_vib(num_classes)
-        if args.target =='HSIC':
-            E = model.VGG16(num_classes,hsic_training=True)
-        e_path = args.target +'_eval.tar'
-        E = nn.DataParallel(E).cuda()
-        ckp_E = torch.load(e_path)
-        E.load_state_dict(ckp_E['state_dict'], strict=False)
-
         g_path = "./G.tar"
         G = generator.Generator()
         G = nn.DataParallel(G).cuda()
@@ -172,11 +164,16 @@ if __name__ == '__main__':
         D.load_state_dict(ckp_D['state_dict'], strict=False)
 
         if args.defense == 'HSIC' or args.defense == 'COCO':
-            
             hp_ac_list = [
-
+                # HSIC
+                # 1
                 (0.05, 0.5, 80.35),
-
+                # (0.05, 1.0, 70.08),
+                # (0.05, 2.5, 56.18),
+                # 2
+                # (0.05, 0.5, 78.89),
+                # (0.05, 1.0, 69.68),
+                # (0.05, 2.5, 56.62),
             ]
             for (a1, a2, ac) in hp_ac_list:
                 print("a1:", a1, "a2:", a2, "test_acc:", ac)
@@ -184,11 +181,13 @@ if __name__ == '__main__':
                 T = model.VGG16(num_classes, True)
                 T = nn.DataParallel(T).cuda()
 
+                model_tar = f"{model_name}_{a1:.3f}&{a2:.3f}_{ac:.2f}.tar"
+
                 path_T = 'HSIC.tar'
 
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'], strict=False)
-                
+                E=T
                 res_all = []
                 ids = 300
                 times = 5
@@ -201,13 +200,16 @@ if __name__ == '__main__':
                     iden = iden + ids_per_time
 
                 res = np.array(res_all).mean(0)
+                
                 print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-
+                
 
         else:
             if args.defense == "vib":
                 path_T_list = [
-                    'VIB.tar'
+                    os.path.join(args.model_path, args.dataset, args.defense, "VGG16_beta0.003_77.59.tar"),
+                    os.path.join(args.model_path, args.dataset, args.defense, "VGG16_beta0.010_67.72.tar"),
+                    os.path.join(args.model_path, args.dataset, args.defense, "VGG16_beta0.020_59.24.tar"),
                 ]
                 for path_T in path_T_list:
                     T = model.VGG16_vib(num_classes)
@@ -229,8 +231,12 @@ if __name__ == '__main__':
                         iden = iden + ids_per_time
 
                     res = np.array(res_all).mean(0)
+                    fid_value = calculate_fid_given_paths(args.dataset,
+                                                          [f'attack_res/{args.dataset}/trainset/',
+                                                           f'attack_res/{args.dataset}/{args.defense}/all/'],
+                                                          50, 1, 2048)
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-
+                    print(f'FID:{fid_value:.4f}')
 
             elif args.defense == 'reg':
                 path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_85.87.tar")
@@ -255,6 +261,65 @@ if __name__ == '__main__':
                     iden = iden + ids_per_time
 
                 res = np.array(res_all).mean(0)
-
+                fid_value = calculate_fid_given_paths(args.dataset,
+                                                      [f'attack_res/{args.dataset}/trainset/',
+                                                       f'attack_res/{args.dataset}/{args.defense}/all/'],
+                                                      50, 1, 2048)
                 print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
+                print(f'FID:{fid_value:.4f}')
 
+    elif args.dataset == 'mnist':
+        num_classes = 5
+
+        e_path = os.path.join(eval_path, "SCNN_99.28.tar")
+        E = model.SCNN(10)
+        E = nn.DataParallel(E).cuda()
+        ckp_E = torch.load(e_path)
+        E.load_state_dict(ckp_E['state_dict'])
+        g_path = "./result/models_mnist_gan/mnist_G_300.tar"
+        G = generator.GeneratorMNIST()
+        G = nn.DataParallel(G).cuda()
+        ckp_G = torch.load(g_path)
+        G.load_state_dict(ckp_G['state_dict'])
+
+        d_path = "./result/models_mnist_gan/mnist_D_300.tar"
+        D = discri.DGWGAN32()
+        D = nn.DataParallel(D).cuda()
+        ckp_D = torch.load(d_path)
+        D.load_state_dict(ckp_D['state_dict'])
+
+        if args.defense == "HSIC":
+            pass
+        else:
+            if args.defense == "vib":
+                T = model.MCNN_vib(num_classes)
+            elif args.defense == 'reg':
+                path_T = os.path.join(args.model_path, args.dataset, args.defense, "MCNN_reg_99.94.tar")
+                T = model.MCNN(num_classes)
+
+            T = nn.DataParallel(T).cuda()
+            checkpoint = torch.load(path_T)
+            ckp_T = torch.load(path_T)
+            T.load_state_dict(ckp_T['state_dict'])
+
+            aver_acc, aver_acc5, aver_var, aver_var5 = 0, 0, 0, 0
+            K = 1
+            for i in range(K):
+                if args.verbose:
+                    print('-------------------------')
+                iden = torch.from_numpy(np.arange(5))
+                acc, acc5, var, var5 = inversion(args, G, D, T, E, iden, lr=0.01, lamda=100,
+                                                 iter_times=args.iter, num_seeds=100, verbose=args.verbose)
+                aver_acc += acc / K
+                aver_acc5 += acc5 / K
+                aver_var += var / K
+                aver_var5 += var5 / K
+
+                os.system(
+                    "cd attack_res/pytorch-fid/ && python fid_score.py ../mnist/trainset/ ../mnist/HSIC/all/ --dataset=mnist")
+
+            print("Average Acc:{:.2f}\tAverage Acc5:{:.2f}\tAverage Acc_var:{:.4f}\tAverage Acc_var5:{:.4f}".format(
+                aver_acc,
+                aver_acc5,
+                aver_var,
+                aver_var5, ))

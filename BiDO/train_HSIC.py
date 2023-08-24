@@ -5,8 +5,6 @@ from copy import deepcopy
 import numpy as np
 import collections
 
-from torchvision import transforms, datasets
-
 import model
 from util import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
 
@@ -53,7 +51,7 @@ def main(args, loaded_args, trainloader, testloader):
     milestones = loaded_args[model_name]["adjust_epochs"]
 
     hp_list = [
-        (0.01,0.01), (0.5,0.5)
+        (0, 0)
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -62,13 +60,12 @@ def main(args, loaded_args, trainloader, testloader):
         print("a1:", a1, "a2:", a2)
 
         if model_name == "VGG16" or model_name == "reg":
-            net = model.VGG16(n_classes, hsic_training=False, dataset=args.dataset)
+            net = model.VGG16(n_classes, hsic_training=args.hsic_training, dataset=args.dataset)
 
             load_pretrained_feature_extractor = True
             if load_pretrained_feature_extractor:
-                pretrained_model_ckpt = "./model.pth"
+                pretrained_model_ckpt = "target_model/vgg16_bn-6c64b313.pth"
                 checkpoint = torch.load(pretrained_model_ckpt)
-                #net.load_state_dict(checkpoint['state_dict'],strict=False)
                 load_feature_extractor(net, checkpoint)
 
         elif model_name == "ResNet":
@@ -132,30 +129,8 @@ if __name__ == '__main__':
     train_file = loaded_args['dataset']['train_file']
     test_file = loaded_args['dataset']['test_file']
 
-    data_path = '/workspace/data/'
-    batch_size = 64
-    train_folder = 'train/'
-    test_folder = 'test/'
-    image_transforms = {
-        'train': transforms.Compose([
-            transforms.CenterCrop((128,128)),
-            transforms.Resize(64),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
-        ]),
-        'test': transforms.Compose([
-            transforms.CenterCrop((128,128)),
-            transforms.Resize(64),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
-        ])
-    }
-    train_images = datasets.ImageFolder(data_path+train_folder,image_transforms['train'])
-    train_loader = torch.utils.data.DataLoader(train_images, batch_size = 64 ,num_workers=4,shuffle=True)
-    test_images = datasets.ImageFolder(data_path+test_folder,image_transforms['test'])
-    test_loader = torch.utils.data.DataLoader(test_images, batch_size = 64 ,num_workers=4,shuffle=True) 
- 
+    trainloader = utils.init_dataloader(loaded_args, train_file, mode="train")
+    testloader = utils.init_dataloader(loaded_args, test_file, mode="test")
 
-
-    main(args, loaded_args, train_loader, test_loader)
+    main(args, loaded_args, trainloader, testloader)
 
