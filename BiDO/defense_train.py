@@ -101,7 +101,7 @@ def HSIC(args, trainloader, testloader):
         mlflow.log_metric("accuracy", best_ACC)
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
-        }, model_path, "{}_{:.3f}&{:.3f}_{:.2f}.tar".format(model_name, a1, a2, best_ACC))
+        }, '../GMI/', "{}_{:.3f}_{:.3f}_{:.2f}.tar".format(model_name, a1, a2, best_ACC))
 
 def VIB(args,trainloader, testloader):
 
@@ -147,7 +147,7 @@ def VIB(args,trainloader, testloader):
     mlflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, model_path, "{}_beta{:.3f}_{:.2f}.tar".format(model_name, 0.01, best_ACC))
+    }, '../GMI', "{}_beta{:.3f}_{:.2f}.tar".format(model_name, 0.01, best_ACC))
 
 def NODEF(args, n_classes, trainloader, testloader):
     model_name = 'VGG16'
@@ -158,7 +158,7 @@ def NODEF(args, n_classes, trainloader, testloader):
 
 
     if model_name == "VGG16" or model_name == "reg":
-        net = model.VGG16(n_classes,hsic_training=False)
+        net = model.VGG16_V(n_classes)
 
     elif model_name == "ResNet":
         net = model.ResNetCls(nclass=n_classes, resnetl=10)
@@ -181,7 +181,7 @@ def NODEF(args, n_classes, trainloader, testloader):
     mlflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, model_path, "{}_{}_{:.2f}.tar".format(model_name,n_classes, best_ACC))
+    }, '../GMI/', "VGG16.tar")
 
 
 
@@ -195,12 +195,6 @@ def KD(args, n_classes, trainloader, testloader):
         if model_name == "VGG16" or model_name == "reg":
             net = model.VGG16_V(n_classes)
 
-            load_pretrained_feature_extractor = False
-            if load_pretrained_feature_extractor:
-                pretrained_model_ckpt = "/workspace/data/vgg.pth"
-                checkpoint = torch.load(pretrained_model_ckpt)
-                load_feature_extractor(net, checkpoint)
-
         elif model_name == "ResNet":
             net = model.ResNetCls(nclass=n_classes, resnetl=10)
             # net = model.ResNet18(n_classes=n_classes)
@@ -210,7 +204,7 @@ def KD(args, n_classes, trainloader, testloader):
         net = torch.nn.DataParallel(net).to(device)
         #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
         teacher = model.VGG16_V(n_classes)
-        e_path = '/workspace/data/target_model/celeba/NODEF/VGG16_0.000&0.000_77.47.tar'
+        e_path = '../GMI/VGG16.tar'
         ckp_E = torch.load(e_path)
         teacher.load_state_dict(ckp_E, strict=False)
         teacher = teacher.cuda()
@@ -230,7 +224,7 @@ def KD(args, n_classes, trainloader, testloader):
         mlflow.log_metric("accuracy", best_ACC)
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
-            }, model_path, "{}_{:.4f}.tar".format(model_name+'kd', best_ACC))
+            }, '../GMI', "KD.tar")
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -288,7 +282,6 @@ if __name__ == '__main__':
         VIB(args, train_loader , test_loader)
     if args.defense=='NODEF':
         NODEF(args, 1000, train_loader,test_loader)
-
     if args.defense=='KD':
         KD(args, args.nclass, train_loader, test_loader)
 
