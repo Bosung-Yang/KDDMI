@@ -18,7 +18,7 @@ from utils import save_tensor_images
 
 
 def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500,
-              clip_range=1, num_seeds=5, verbose=False):
+              clip_range=1, num_seeds=2, verbose=False):
     iden = iden.view(-1).long().cuda()
     criterion = nn.CrossEntropyLoss().cuda()
     bs = iden.shape[0]
@@ -155,8 +155,8 @@ if __name__ == '__main__':
         num_classes = 1000
         if args.target=='HSIC':
             E = model.VGG16(num_classes,True)
-            path_E = './HSIC.tar'
-        elif args.target == 'vib':
+            path_E = 'VGG16_0.050_0.200_68.20.tar'
+        elif args.target == 'VIB':
             E = model.VGG16_vib(num_classes)
             path_E = './VIB_eval.tar'
         elif args.target =='VGG16':
@@ -203,7 +203,7 @@ if __name__ == '__main__':
 
                 model_tar = f"{model_name}_{a1:.3f}&{a2:.3f}_{ac:.2f}.tar"
 
-                path_T = 'HSIC.tar'
+                path_T = 'VGG16_0.050_0.200_68.20.tar'
 
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'], strict=False)
@@ -225,7 +225,7 @@ if __name__ == '__main__':
                 
 
         else:
-            if args.defense == "vib":
+            if args.defense == "VIB":
                 path_T_list = [
                     'VIB.tar'
                 ]
@@ -276,7 +276,7 @@ if __name__ == '__main__':
 
                 res = np.array(res_all).mean(0)
                 print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-            mlflow.log_metric("Top1", res[0])
-            mlflow.log_metric('top1-std', res[2])
-            mlflow.log_metric("Top5", res[1])
-            mlflow.log_metric('top5_std', res[4])
+        mlflow.log_metric("Top1", res[0])
+        mlflow.log_metric('top1-std', res[2])
+        mlflow.log_metric("Top5", res[1])
+        mlflow.log_metric('top5_std', res[3])

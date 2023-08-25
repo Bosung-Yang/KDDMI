@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/GMI/mlruns/0/358915ff1d474a54b61fc2f151de34a4/artifacts
+end_time: 1692905721982
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 358915ff1d474a54b61fc2f151de34a4
+run_name: suave-grouse-268
+run_uuid: 358915ff1d474a54b61fc2f151de34a4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692905709788
+status: 3
+tags: []
+user_id: root
