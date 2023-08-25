@@ -184,12 +184,20 @@ def NODEF(args, n_classes, trainloader, testloader):
     }, '../GMI/', "VGG16.tar")
 
 
+def distillation(student_scores, labels, teacher_scores):
+    # distillation loss + classification loss
+    # y: student
+    # labels: hard label
+    # teacher_scores: soft label
+    teacher_scores = F.softmax(teacher_scores)
+    return F.cross_entropy(student_scores,labels) + nn.MSELoss()(student_scores,teacher_scores)
+    #return nn.MSELoss()(y,teacher_scores)
 
 def KD(args, n_classes, trainloader, testloader):
     n_epochs = 50
     lr = 0.0001
 
-    lossfns = [distillation, mse, temp, all_func]
+    lossfns = distillation
     for loss in lossfns:
         criterion = loss
         if model_name == "VGG16" or model_name == "reg":
@@ -206,7 +214,7 @@ def KD(args, n_classes, trainloader, testloader):
         teacher = model.VGG16_V(n_classes)
         e_path = '../GMI/VGG16.tar'
         ckp_E = torch.load(e_path)
-        teacher.load_state_dict(ckp_E, strict=False)
+        teacher.load_state_dict(ckp_E['state_dict'], strict=False)
         teacher = teacher.cuda()
 
         best_ACC = -1
