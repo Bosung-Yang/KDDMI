@@ -197,7 +197,7 @@ def KD(args, n_classes, trainloader, testloader):
     n_epochs = 50
     lr = 0.0001
 
-    lossfns = distillation
+    lossfns = [distillation]
     for loss in lossfns:
         criterion = loss
         if model_name == "VGG16" or model_name == "reg":
