@@ -142,7 +142,6 @@ def inversion(G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=150
                 seed_acc[i, random_seed] = 1
                 cnt += 1
                 best_img = G(z)[i]
-                save_tensor_images(best_img.detach(), os.path.join(success_dir, "{}_attack_iden_{}_{}.png".format(itr, gt+1, int(no[i]))))
                 no[i] += 1
             _, top5_idx = torch.topk(eval_prob[i], 5)
             if gt in top5_idx:
