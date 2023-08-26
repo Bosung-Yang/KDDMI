@@ -7,9 +7,6 @@ import collections
 from torchvision import transforms, datasets
 import model
 from util import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
-import mlflow.pytorch
-from mlflow.models import infer_signature
-import mlflow
 device = "cuda"
 import torch.nn.functional as F
 
@@ -229,10 +226,10 @@ def KD(args, n_classes, trainloader, testloader):
             #scheduler.step()
 
         print("best acc:", best_ACC)
-        mlflow.log_metric("accuracy", best_ACC)
+        
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
-            }, '../GMI', "KD.tar")
+            }, '../GMI', "KD_eval.tar")
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
