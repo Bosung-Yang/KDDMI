@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/GMI/mlruns/0/c1d94ca341dd4a4da81272a6809e34d7/artifacts
+end_time: 1692905476653
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c1d94ca341dd4a4da81272a6809e34d7
+run_name: whimsical-jay-957
+run_uuid: c1d94ca341dd4a4da81272a6809e34d7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692903382117
+status: 4
+tags: []
+user_id: root

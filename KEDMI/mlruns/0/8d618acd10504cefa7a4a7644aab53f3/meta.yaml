@@ -1,0 +1,15 @@
+artifact_uri: file:///workspace/KDDMI/GMI/mlruns/0/8d618acd10504cefa7a4a7644aab53f3/artifacts
+end_time: 1692905834274
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 8d618acd10504cefa7a4a7644aab53f3
+run_name: awesome-trout-153
+run_uuid: 8d618acd10504cefa7a4a7644aab53f3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692905822033
+status: 3
+tags: []
+user_id: root
