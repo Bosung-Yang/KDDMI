@@ -67,7 +67,8 @@ def inversion(G, D, T, E, iden, itr, lr=2e-2, momentum=0.9, lamda=100, iter_time
     params = [mu, log_var]
     solver = optim.Adam(params, lr=lr)
     # scheduler = torch.optim.lr_scheduler.StepLR(solver, 1800, gamma=0.1)
-        
+    res = []
+    res5 = []     
     for i in range(iter_times):
         z = reparameterize(mu, log_var)
         fake = G(z)
