@@ -289,8 +289,8 @@ if __name__ == '__main__':
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
 
 
-            elif args.defense == 'KD':
-                path_T = 'KD.tar'
+            elif args.defense == 'VGG16':
+                path_T = 'VGG16.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 
