@@ -36,7 +36,7 @@ def reparameterize(mu, logvar):
     return eps * std + mu
 
 
-def inversion(G, D, T, E, iden, itr, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500, clip_range=1, improved=True, num_seeds=5, exp_name=' '):
+def inversion(G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500, clip_range=1, improved=True, num_seeds=5, exp_name=' '):
     
     device = "cuda"
     num_classes = 1000
