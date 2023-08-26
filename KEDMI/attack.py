@@ -12,6 +12,7 @@ from torch.autograd import Variable
 import torch.optim as optim
 from generator import *
 from discri import *
+from utils import *
 device = "cuda"
 
 import sys
