@@ -252,7 +252,7 @@ if __name__ == '__main__':
                 iden = torch.from_numpy(np.arange(ids_per_time))
                 for idx in range(times):
                     print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res = inversion(args, G, D, T, E, iden, iter_times=2000, verbose=True)
+                    res = inversion(G, D, T, E, iden, iter_times=2000)
                     res_all.append(res)
                     iden = iden + ids_per_time
 
@@ -264,7 +264,7 @@ if __name__ == '__main__':
         else:
             if args.defense == "VIB":
                 path_T_list = [
-                    'VIB.tar'
+                    'VGG16_vib_beta0.020_51.94.tar'
                 ]
                 for path_T in path_T_list:
                     T = model.VGG16_vib(num_classes)
@@ -281,7 +281,7 @@ if __name__ == '__main__':
                     iden = torch.from_numpy(np.arange(ids_per_time))
                     for idx in range(times):
                         print("--------------------- Attack batch [%s]------------------------------" % idx)
-                        res = inversion(args, G, D, T, E, iden, iter_times=2000, verbose=True)
+                        res = inversion( G, D, T, E, iden, iter_times=2000)
                         res_all.append(res)
                         iden = iden + ids_per_time
 
@@ -289,8 +289,8 @@ if __name__ == '__main__':
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
 
 
-            elif args.defense == 'VGG16':
-                path_T = 'VGG16.tar'
+            else:
+                path_T = args.defense+'.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 
