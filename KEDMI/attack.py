@@ -78,7 +78,7 @@ def inversion(G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=150
         else:
             label = D(fake)
         
-        out = T(fake)[1]
+        out = T(fake)[-1]
         
         for p in params:
             if p.grad is not None:
@@ -104,7 +104,7 @@ def inversion(G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=150
             cnt5 = 0
             z = reparameterize(mu, log_var)
             fake_img = G(z.detach())
-            eval_prob = T(fake_img)[1]
+            eval_prob = T(fake_img)[-1]
             eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
             acc = iden.eq(eval_iden.long()).sum().item() * 1.0 / bs
             for j in range(bs):
@@ -128,8 +128,8 @@ def inversion(G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=150
         tf = time.time()
         z = reparameterize(mu, log_var)
         fake = G(z)
-        score = T(fake)[1]
-        eval_prob = E(fake)[1]
+        score = T(fake)[-1]
+        eval_prob = E(fake)[-1]
         eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
         
         cnt, cnt5 = 0, 0
