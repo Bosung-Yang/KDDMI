@@ -208,8 +208,12 @@ def KD(args, n_classes, trainloader, testloader):
 
         net = torch.nn.DataParallel(net).to(device)
         #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
-        teacher = model.VGG16_V(n_classes)
-        e_path = '../GMI/VGG16.tar'
+        if args.teacher=='VGG16':
+            teacher = model.VGG16_V(n_classes)
+            e_path = '../GMI/VGG16.tar'
+        elif args.teacher == 'HSIC':
+            teacher = model.VGG16(n_classes,True)
+            e_path = '../GMI/VGG16_0.050_0.200_68.20.tar'
         ckp_E = torch.load(e_path)
         teacher.load_state_dict(ckp_E['state_dict'], strict=False)
         teacher = teacher.cuda()
@@ -241,6 +245,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_dir', default='./target_model', help='')
     parser.add_argument('--nclass', type=int , default=1000)
     parser.add_argument('--model',type=str, default = 'VGG16')
+    parser.add_argument('--teacher', type=str, default='VGG16')
 
     args = parser.parse_args()
     
