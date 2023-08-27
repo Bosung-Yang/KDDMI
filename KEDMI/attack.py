@@ -195,7 +195,7 @@ if __name__ == '__main__':
             path_E = 'VGG16_0.050_0.200_68.20.tar'
         elif args.target == 'VIB':
             E = model.VGG16_vib(num_classes)
-            path_E = './VIB_eval.tar'
+            path_E = 'VGG16_vib_beta0.020_51.94.tar'
         elif args.target =='VGG16':
             E = model.VGG16_V(num_classes)
             path_E = './VGG16_eval.tar'
