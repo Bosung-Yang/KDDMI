@@ -192,10 +192,10 @@ if __name__ == '__main__':
         num_classes = 1000
         if args.target=='HSIC':
             E = model.VGG16(num_classes,True)
-            path_E = 'VGG16_0.050_0.200_68.20.tar'
+            path_E = 'VGG16_0.050_0.200_67.36.tar'
         elif args.target == 'VIB':
             E = model.VGG16_vib(num_classes)
-            path_E = 'VGG16_vib_beta0.020_51.94.tar'
+            path_E = 'VIB_eval.tar'
         elif args.target =='VGG16':
             E = model.VGG16_V(num_classes)
             path_E = './VGG16_eval.tar'
