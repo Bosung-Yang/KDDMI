@@ -44,7 +44,7 @@ def load_feature_extractor(net, state_dict):
 def HSIC(args, trainloader, testloader):
     n_classes = 1000
     hp_list = [
-                 (0.05,0.2)#,(0.05,0.5), (0.1,0.1)
+                 (0.05,0.2) ,(0.05,0.5), (0.1,0.1), (0.05,0.3), (0.3,0.05)
     ]
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -95,7 +95,7 @@ def HSIC(args, trainloader, testloader):
             scheduler.step()
 
         print("best acc:", best_ACC)
-        mlflow.log_metric("accuracy", best_ACC)
+        #mlflow.log_metric("accuracy", best_ACC)
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
         }, '../GMI/', "{}_{:.3f}_{:.3f}_{:.2f}.tar".format(model_name, a1, a2, best_ACC))
@@ -141,7 +141,7 @@ def VIB(args,trainloader, testloader):
         # scheduler.step()
 
     print("best acc:", best_ACC)
-    mlflow.log_metric("accuracy", best_ACC)
+    #malflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
     }, '../GMI', "{}_beta{:.3f}_{:.2f}.tar".format(model_name, 0.01, best_ACC))
@@ -186,13 +186,13 @@ def distillation(student_scores, labels, teacher_scores):
     # y: student
     # labels: hard label
     # teacher_scores: soft label
-    teacher_scores = F.softmax(teacher_scores)
-    return F.cross_entropy(student_scores,labels) + nn.MSELoss()(student_scores,teacher_scores)
+    #teacher_scores = F.softmax(teacher_scores)
+    return F.cross_entropy(student_scores,labels) +10* nn.MSELoss()(student_scores,teacher_scores)
     #return nn.MSELoss()(y,teacher_scores)
 
 def KD(args, n_classes, trainloader, testloader):
-    n_epochs = 50
-    lr = 0.0001
+    n_epochs = 100
+    lr = 0.001
 
     lossfns = [distillation]
     for loss in lossfns:
@@ -233,7 +233,7 @@ def KD(args, n_classes, trainloader, testloader):
         
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
-            }, '../GMI', "KD_eval.tar")
+            }, '../GMI', "KD_lastest.tar")
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

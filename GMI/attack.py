@@ -164,7 +164,7 @@ if __name__ == '__main__':
             path_E = './VGG16_eval.tar'
         elif args.target =='KD':
             E = model.VGG16_V(num_classes)
-            path_E = './KD.tar'
+            path_E = './KD_lastest.tar'
         E = nn.DataParallel(E).cuda()
 
         checkpoint = torch.load(path_E)
@@ -252,8 +252,11 @@ if __name__ == '__main__':
                     print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
 
 
-            elif args.defense == 'KD':
-                path_T = 'KD.tar'
+            elif args.defense == 'KD' or args.defense == 'VGG16':
+                if args.defense == 'KD':
+                    path_T = args.defense+'_lastest.tar'
+                else :
+                    path_T = 'VGG16.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 

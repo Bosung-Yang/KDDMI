@@ -201,7 +201,7 @@ if __name__ == '__main__':
             path_E = './VGG16_eval.tar'
         elif args.target =='KD':
             E = model.VGG16_V(num_classes)
-            path_E = './KD.tar'
+            path_E = './KD_lastest.tar'
         E = nn.DataParallel(E).cuda()
 
         checkpoint = torch.load(path_E)
@@ -290,7 +290,7 @@ if __name__ == '__main__':
 
 
             else:
-                path_T = args.defense+'.tar'
+                path_T = args.defense+'_lastest.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 
@@ -313,7 +313,7 @@ if __name__ == '__main__':
 
                 res = np.array(res_all).mean(0)
                 print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-        mlflow.log_metric("Top1", res[0])
-        mlflow.log_metric('top1-std', res[2])
-        mlflow.log_metric("Top5", res[1])
-        mlflow.log_metric('top5_std', res[3])
+        mlflow.log_metric("Top1", res[0]*100)
+        mlflow.log_metric('top1-std', res[2]*100)
+        mlflow.log_metric("Top5", res[1]*100)
+        mlflow.log_metric('top5_std', res[3]*100)
