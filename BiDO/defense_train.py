@@ -190,6 +190,16 @@ def distillation(student_scores, labels, teacher_scores):
     return F.cross_entropy(student_scores,labels) +10* nn.MSELoss()(student_scores,teacher_scores)
     #return nn.MSELoss()(y,teacher_scores)
 
+def mkd(student_scores, labels, vgg_output, hsic_output):
+    # distillation loss + classification loss
+    # y: student
+    # labels: hard label
+    # teacher_scores: soft label
+    #teacher_scores = F.softmax(teacher_scores)
+    T=64
+    return F.cross_entropy(student_scores,labels) +100* nn.MSELoss()(student_scores,hsic_output) +  nn.KLDivLoss()(F.log_softmax(student_scores/T), F.softmax(student_scores/T)) * (T*T * 2.0 + 0.7)
+    #return nn.MSELoss()(y,teacher_scores)
+
 def KD(args, n_classes, trainloader, testloader):
     n_epochs = 100
     lr = 0.001
@@ -235,6 +245,44 @@ def KD(args, n_classes, trainloader, testloader):
             'state_dict': best_model.state_dict(),
             }, '../GMI', "KD_lastest.tar")
 
+def Multiple_KD(args, n_classes, trainloader, testloader):
+    n_epochs = 100
+    lr = 0.001
+
+    vgg_teacher = model.VGG16_V(n_classes)
+    vgg_path = '../final_tars/VGG16.tar'
+    ckp_E = torch.load(vgg_path)
+    vgg_teacher.load_state_dict(ckp_E['state_dict'], strict=False)
+    vgg_teacher = vgg_teacher.cuda()
+
+    hsic_teacher = model.VGG16(n_classes, True)
+    hsic_path = '../final_tars/HSIC.tar'
+    ckp_E = torch.load(hsic_path)
+    hsic_teacher.load_state_dict(ckp_E['state_dict'], strict=False)
+    hsic_teacher = hsic_teacher.cuda()
+    lossfns = [mkd]
+    for loss in lossfns:
+        criterion = loss
+        net = model.VGG16_V(n_classes)
+        optimizer = torch.optim.Adam(net.parameters(), lr)
+        net = torch.nn.DataParallel(net).to(device)
+        best_ACC = -1
+        for epoch in range(n_epochs):
+            print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
+            train_loss, train_acc = engine.train_kd(net,vgg_teacher,hsic_teacher, criterion, optimizer, trainloader)
+            test_acc = engine.test(net, criterion, testloader)
+            print(test_acc)
+            if test_acc > best_ACC:
+                best_ACC = test_acc
+                best_model = deepcopy(net)
+            #scheduler.step()
+
+        print("best acc:", best_ACC)
+        
+        utils.save_checkpoint({
+            'state_dict': best_model.state_dict(),
+            }, '../final_tars/', "MKD.tar")
+        
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
