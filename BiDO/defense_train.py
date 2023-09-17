@@ -222,7 +222,7 @@ def KD(args, n_classes, trainloader, testloader):
         #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
         if args.teacher=='VGG16':
             teacher = model.VGG16_V(n_classes)
-            e_path = '../GMI/VGG16.tar'
+            e_path = '../final_tars/VGG16.tar'
         elif args.teacher == 'HSIC':
             teacher = model.VGG16(n_classes,True)
             e_path = '../GMI/VGG16_0.050_0.200_68.20.tar'
