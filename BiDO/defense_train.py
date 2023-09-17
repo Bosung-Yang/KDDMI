@@ -175,7 +175,7 @@ def NODEF(args, n_classes, trainloader, testloader):
         print(test_acc)
 
     print("best acc:", best_ACC)
-    mlflow.log_metric("accuracy", best_ACC)
+    
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
     }, '../final_tars/', "VGG16-vs.tar")
