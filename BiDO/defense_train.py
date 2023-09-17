@@ -187,7 +187,9 @@ def distillation(student_scores, labels, teacher_scores):
     # labels: hard label
     # teacher_scores: soft label
     #teacher_scores = F.softmax(teacher_scores)
-    return F.cross_entropy(student_scores,labels) +10* nn.MSELoss()(student_scores,teacher_scores)
+    T = 2
+    return F.cross_entropy(student_scores,labels) + nn.KLDivLoss()(F.log_softmax(student_scores/T), F.softmax(teacher_scores/T)) * (T*T * 2.0 + 0.7)
+    #10* nn.MSELoss()(student_scores,teacher_scores)
     #return nn.MSELoss()(y,teacher_scores)
 
 def mkd(student_scores, labels, vgg_output, hsic_output):
@@ -197,7 +199,7 @@ def mkd(student_scores, labels, vgg_output, hsic_output):
     # teacher_scores: soft label
     #teacher_scores = F.softmax(teacher_scores)
     T=64
-    return F.cross_entropy(student_scores,labels) +100* nn.MSELoss()(student_scores,hsic_output) +  nn.KLDivLoss()(F.log_softmax(student_scores/T), F.softmax(student_scores/T)) * (T*T * 2.0 + 0.7)
+    return F.cross_entropy(student_scores,labels) +100* nn.MSELoss()(student_scores,hsic_output) +  nn.KLDivLoss()(F.log_softmax(student_scores/T), F.softmax(vgg_output/T)) * (T*T * 2.0 + 0.7)
     #return nn.MSELoss()(y,teacher_scores)
 
 def KD(args, n_classes, trainloader, testloader):
