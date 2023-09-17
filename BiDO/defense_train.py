@@ -55,7 +55,7 @@ def HSIC(args, trainloader, testloader):
         if model_name == "VGG16" or model_name == "reg":
             net = model.VGG16(n_classes,hsic_training=True)
 
-            load_pretrained_feature_extractor = True
+            load_pretrained_feature_extractor = False
             if load_pretrained_feature_extractor:
                 print('use')
                 pretrained_model_ckpt = "./model.pth"
@@ -98,7 +98,7 @@ def HSIC(args, trainloader, testloader):
         #mlflow.log_metric("accuracy", best_ACC)
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
-        }, '../GMI/', "{}_{:.3f}_{:.3f}_{:.2f}.tar".format(model_name, a1, a2, best_ACC))
+        }, '../final_tars/', "BiDO_teacher_{:.2f}.tar".format(best_ACC))
 
 def VIB(args,trainloader, testloader):
 
