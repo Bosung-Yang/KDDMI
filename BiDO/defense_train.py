@@ -178,7 +178,7 @@ def NODEF(args, n_classes, trainloader, testloader):
     mlflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, '../GMI/', "VGG16.tar")
+    }, '../final_tars/', "VGG16-vs.tar")
 
 
 def distillation(student_scores, labels, teacher_scores):
@@ -341,7 +341,7 @@ if __name__ == '__main__':
     if args.defense == 'VIB':
         VIB(args, train_loader , test_loader)
     if args.defense=='NODEF':
-        NODEF(args, 1000, train_loader,test_loader)
+        NODEF(args, 2000, train_loader,test_loader)
     if args.defense=='KD':
         KD(args, args.nclass, train_loader, test_loader)
 
