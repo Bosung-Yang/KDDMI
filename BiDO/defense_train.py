@@ -222,7 +222,7 @@ def KD(args, n_classes, trainloader, testloader):
         #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
         if args.teacher=='VGG16':
             teacher = model.VGG16_V(n_classes)
-            e_path = '../final_tars/VGG16.tar'
+            e_path = '../final_tars/VGG16-vs.tar'
         elif args.teacher == 'HSIC':
             teacher = model.VGG16(n_classes,True)
             e_path = '../GMI/VGG16_0.050_0.200_68.20.tar'
@@ -245,7 +245,7 @@ def KD(args, n_classes, trainloader, testloader):
         
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
-            }, '../GMI', "KD_lastest.tar")
+            }, '../final_tars', "multiclass_teacher.tar")
 
 def Multiple_KD(args, n_classes, trainloader, testloader):
     n_epochs = 100
