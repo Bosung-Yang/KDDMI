@@ -192,7 +192,7 @@ if __name__ == '__main__':
         num_classes = 1000
         if args.target=='HSIC':
             E = model.VGG16(num_classes,True)
-            path_E = 'VGG16_0.050_0.200_67.36.tar'
+            path_E = '../final_tars/BiDO_teacher_72.75.tar'
         elif args.target == 'VIB':
             E = model.VGG16_vib(num_classes)
             path_E = 'VIB_eval.tar'

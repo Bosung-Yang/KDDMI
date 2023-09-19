@@ -98,7 +98,7 @@ def HSIC(args, trainloader, testloader):
         #mlflow.log_metric("accuracy", best_ACC)
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
-        }, '../final_tars/', "BiDO_teacher_{:.2f}.tar".format(best_ACC))
+            }, '../final_tars/', "BiDO_teacher_{:.2f}_{}_{}.tar".format(best_ACC,a1,a2))
 
 def VIB(args,trainloader, testloader):
 
@@ -144,7 +144,7 @@ def VIB(args,trainloader, testloader):
     #malflow.log_metric("accuracy", best_ACC)
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, '../GMI', "{}_beta{:.3f}_{:.2f}.tar".format(model_name, 0.01, best_ACC))
+    }, '../final_tars/', "VIB_teacher_{:.3f}_{:.2f}.tar".format(0.01, best_ACC))
 
 def NODEF(args, n_classes, trainloader, testloader):
     model_name = 'VGG16'
@@ -178,7 +178,7 @@ def NODEF(args, n_classes, trainloader, testloader):
     
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-    }, '../final_tars/', "VGG16-vs.tar")
+        }, '../final_tars/eval/', "VGG16_{:.2f}.tar".format(best_ACC))
 
 
 def distillation(student_scores, labels, teacher_scores):
@@ -225,7 +225,7 @@ def KD(args, n_classes, trainloader, testloader):
             e_path = '../final_tars/VGG16-vs.tar'
         elif args.teacher == 'HSIC':
             teacher = model.VGG16(n_classes,True)
-            e_path = '../GMI/VGG16_0.050_0.200_68.20.tar'
+            e_path = '../final_tars/teacher/BiDO_teacher_72.75.tar'
         ckp_E = torch.load(e_path)
         teacher.load_state_dict(ckp_E['state_dict'], strict=False)
         teacher = teacher.cuda()
@@ -245,7 +245,7 @@ def KD(args, n_classes, trainloader, testloader):
         
         utils.save_checkpoint({
             'state_dict': best_model.state_dict(),
-            }, '../final_tars', "multiclass_teacher.tar")
+            }, '../final_tars', "student-BiDO_{:.2f}.tar".format(best_ACC))
 
 def Multiple_KD(args, n_classes, trainloader, testloader):
     n_epochs = 100
@@ -341,7 +341,7 @@ if __name__ == '__main__':
     if args.defense == 'VIB':
         VIB(args, train_loader , test_loader)
     if args.defense=='NODEF':
-        NODEF(args, 2000, train_loader,test_loader)
+        NODEF(args, 1000, train_loader,test_loader)
     if args.defense=='KD':
         KD(args, args.nclass, train_loader, test_loader)
 
