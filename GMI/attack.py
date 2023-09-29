@@ -5,9 +5,7 @@ import statistics
 from argparse import ArgumentParser
 from fid_score import calculate_fid_given_paths
 from fid_score_raw import calculate_fid_given_paths0
-import mlflow.pytorch
-from mlflow.models import infer_signature
-import mlflow
+
 device = "cuda"
 
 import sys
