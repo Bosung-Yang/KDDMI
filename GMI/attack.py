@@ -17,7 +17,7 @@ import model, utils
 from utils import save_tensor_images
 
 
-def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500,
+def inversion(args, G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500,
               clip_range=1, num_seeds=2, verbose=False):
     iden = iden.view(-1).long().cuda()
     criterion = nn.CrossEntropyLoss().cuda()
@@ -26,12 +26,9 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
     G.eval()
     D.eval()
     T.eval()
-    E.eval()
 
     flag = torch.zeros(bs)
 
-    res = []
-    res5 = []
     for random_seed in range(num_seeds):
         tf = time.time()
 
@@ -72,10 +69,7 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                 if (i + 1) % 500 == 0:
                     fake_img = G(z.detach())
 
-                    if args.dataset == 'asdasdasceleba':
-                        eval_prob = E(utils.low2high(fake_img))[-1]
-                    else:
-                        eval_prob = E(fake_img)[-1]
+                    eval_prob = E(fake_img)[-1]
 
                     eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
                     acc = iden.eq(eval_iden.long()).sum().item() * 100.0 / bs
@@ -84,12 +78,13 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                                                                                                         Iden_Loss_val,
                                                                                                         acc))
 
-        fake = G(z)
-        if args.dataset == 'celsdasdeba':
-            eval_prob = E(utils.low2high(fake))[-1]
-        else:
-            eval_prob = E(fake)[-1]
-
+##################### evaluation ############################
+    fake = G(z)
+    res = {'vgg':[], 'vib':[], 'hisc':[], 'kd':[], 'white':[]}
+    res5 = {'vgg':[], 'vib':[], 'hisc':[], 'kd':[], 'white':[]}
+    for E, model_name in E_list: 
+        E.eval()
+        eval_prob = E(fake)[-1]
         eval_iden = torch.argmax(eval_prob, dim=1).view(-1)
         cnt, cnt5 = 0, 0
         for i in range(bs):
@@ -97,7 +92,7 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
 
             sample = fake[i]
             save_tensor_images(sample.detach(),
-                               os.path.join(args.save_img_dir,
+                            os.path.join(args.save_img_dir,
                                             "attack_iden_{:03d}|{}.png".format(gt + 1, random_seed + 1)))
 
             if eval_iden[i].item() == gt:
@@ -105,26 +100,32 @@ def inversion(args, G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_tim
                 flag[i] = 1
                 best_img = G(z)[i]
                 save_tensor_images(best_img.detach(),
-                                   os.path.join(args.success_dir,
+                                os.path.join(args.success_dir,
                                                 "attack_iden_{:03d}|{}.png".format(gt + 1, random_seed + 1)))
 
             _, top5_idx = torch.topk(eval_prob[i], 5)
             if gt in top5_idx:
                 cnt5 += 1
 
-        res.append(cnt * 100.0 / bs)
-        res5.append(cnt5 * 100.0 / bs)
+        res[model_name].append(cnt * 100.0 / bs)
+        res5[model_name].append(cnt5 * 100.0 / bs)
         torch.cuda.empty_cache()
         interval = time.time() - tf
-        print("Time:{:.2f}\tAcc:{:.2f}\t".format(interval, cnt * 100.0 / bs))
+        print("{} Time:{:.2f}\tAcc:{:.2f}\t".format(model_name,interval, cnt * 100.0 / bs))
 
-    acc = statistics.mean(res)
-    acc_5 = statistics.mean(res5)
-    acc_var = statistics.stdev(res)
-    acc_var5 = statistics.stdev(res5)
-    print("Acc:{:.2f}\tAcc_5:{:.2f}\tAcc_var:{:.4f}\tacc_var5{:.4f}".format(acc, acc_5, acc_var, acc_var5))
-
-    return acc, acc_5, acc_var, acc_var5
+    acc = statistics.mean(res['vgg'])
+    acc_5 = statistics.mean(res5['vgg'])
+    print("VGG : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    acc = statistics.mean(res['vib'])
+    acc_5 = statistics.mean(res5['vib'])
+    print("vib : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    acc = statistics.mean(res['hsic'])
+    acc_5 = statistics.mean(res5['hsic'])
+    print("hsic : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    acc = statistics.mean(res['white'])
+    acc_5 = statistics.mean(res5['white'])
+    print("white : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    return acc, acc_5
 
 
 if __name__ == '__main__':
@@ -153,23 +154,31 @@ if __name__ == '__main__':
     if args.dataset == 'celeba':
         model_name = "VGG16"
         num_classes = 1000
-        if args.target=='HSIC':
-            E = model.VGG16(num_classes,True)
-            path_E = 'VGG16_0.050_0.200_68.20.tar'
-        elif args.target == 'VIB':
-            E = model.VGG16_vib(num_classes)
-            path_E = './VIB_eval.tar'
-        elif args.target =='VGG16':
-            E = model.VGG16_V(num_classes)
-            path_E = './VGG16_eval.tar'
-        elif args.target =='KD':
-            E = model.VGG16_V(num_classes)
-            path_E = './KD_lastest.tar'
-        E = nn.DataParallel(E).cuda()
-
+   
+        E_hsic = model.VGG16(num_classes,True)
+        path_E = 'VGG16_0.050_0.200_68.20.tar'
+        E_hsic = nn.DataParallel(E_hsic).cuda()
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
-        E.load_state_dict(ckp_E['state_dict'])
+        E_hsic.load_state_dict(ckp_E['state_dict'])
+
+        E_vib = model.VGG16_vib(num_classes)
+        path_E = './VIB_eval.tar'
+        E_vib = nn.DataParallel(E_vib).cuda()
+        checkpoint = torch.load(path_E)
+        ckp_E = torch.load(path_E)
+        E_vib.load_state_dict(ckp_E['state_dict'])
+
+
+        E_vgg = model.VGG16_V(num_classes)
+        path_E = './VGG16_eval.tar'
+        E_vgg = nn.DataParallel(E_vgg).cuda()
+        checkpoint = torch.load(path_E)
+        ckp_E = torch.load(path_E)
+        E_vgg.load_state_dict(ckp_E['state_dict'])
+
+        E_list = [(E_hsic, 'hisc'), (E_vib,'vib'), (E_vgg, 'vgg16')]
+
         
         g_path = "./G.tar"
         G = generator.Generator()
@@ -207,6 +216,7 @@ if __name__ == '__main__':
 
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'], strict=False)
+                E_list.append((T,'white'))
                         
                 res_all = []
                 ids = 300
@@ -215,7 +225,7 @@ if __name__ == '__main__':
                 iden = torch.from_numpy(np.arange(ids_per_time))
                 for idx in range(times):
                     print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res = inversion(args, G, D, T, E, iden, iter_times=2000, verbose=True)
+                    res = inversion(args, G, D, T, E_list, iden, iter_times=2000, verbose=True)
                     res_all.append(res)
                     iden = iden + ids_per_time
 
@@ -236,6 +246,7 @@ if __name__ == '__main__':
                     checkpoint = torch.load(path_T)
                     ckp_T = torch.load(path_T)
                     T.load_state_dict(ckp_T['state_dict'])
+                    E_list.append((T,'white'))
 
                     res_all = []
                     ids = 300
@@ -244,7 +255,7 @@ if __name__ == '__main__':
                     iden = torch.from_numpy(np.arange(ids_per_time))
                     for idx in range(times):
                         print("--------------------- Attack batch [%s]------------------------------" % idx)
-                        res = inversion(args, G, D, T, E, iden, iter_times=2000, verbose=True)
+                        res = inversion(args, G, D, T, E_list, iden, iter_times=2000, verbose=True)
                         res_all.append(res)
                         iden = iden + ids_per_time
 
@@ -265,6 +276,7 @@ if __name__ == '__main__':
                 checkpoint = torch.load(path_T)
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'])
+                E_list.append((T,'white'))
 
                 res_all = []
                 ids = 300
@@ -273,13 +285,10 @@ if __name__ == '__main__':
                 iden = torch.from_numpy(np.arange(ids_per_time))
                 for idx in range(times):
                     print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res = inversion(args, G, D, T, E, iden, lr=2e-2, iter_times=2000, verbose=True)
+                    res = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=True)
                     res_all.append(res)
                     iden = iden + ids_per_time
 
                 res = np.array(res_all).mean(0)
                 print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-        mlflow.log_metric("Top1", res[0])
-        mlflow.log_metric('top1-std', res[2])
-        mlflow.log_metric("Top5", res[1])
-        mlflow.log_metric('top5_std', res[3])
+
