@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
 
         E_vgg = model.VGG16_V(num_classes)
-        path_E = '..final_tars/eval/VGG16_80.16.tar'
+        path_E = '../final_tars/eval/VGG16_79.23.tar'
         E_vgg = nn.DataParallel(E_vgg).cuda()
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
@@ -194,7 +194,7 @@ if __name__ == '__main__':
 
             T = model.VGG16(num_classes, True)
             T = nn.DataParallel(T).cuda()
-            path_T = 'BiDO_teacher_71.92_0.1_0.1.tar'
+            path_T = '../final_tars/BiDO_teacher_71.92_0.1_0.1.tar'
 
             ckp_T = torch.load(path_T)
             T.load_state_dict(ckp_T['state_dict'], strict=False)
@@ -214,7 +214,7 @@ if __name__ == '__main__':
         else:
             if args.defense == "VIB":
                 path_T_list = [
-                    'VIB_teacher_0.010_62.18.tar'
+                    '../final_tars/VIB_teacher_0.010_62.18.tar'
                 ]
                 for path_T in path_T_list:
                     T = model.VGG16_vib(num_classes)
@@ -237,7 +237,7 @@ if __name__ == '__main__':
 
             elif args.defense == 'VGG16':
 
-                path_T = '..final_tars/eval/VGG16_80.16.tar'
+                path_T = '../final_tars/eval/VGG16_80.16.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 
