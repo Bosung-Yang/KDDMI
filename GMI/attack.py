@@ -156,14 +156,14 @@ if __name__ == '__main__':
         num_classes = 1000
    
         E_hsic = model.VGG16(num_classes,True)
-        path_E = 'VGG16_0.050_0.200_68.20.tar'
+        path_E = '../final_tars/BiDO_teacher_71.35_0.1_0.1.tar'
         E_hsic = nn.DataParallel(E_hsic).cuda()
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
         E_hsic.load_state_dict(ckp_E['state_dict'])
 
         E_vib = model.VGG16_vib(num_classes)
-        path_E = './VIB_eval.tar'
+        path_E = '../final_tars/VIB_teacher_0.010_60.95.tar'
         E_vib = nn.DataParallel(E_vib).cuda()
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
@@ -171,7 +171,7 @@ if __name__ == '__main__':
 
 
         E_vgg = model.VGG16_V(num_classes)
-        path_E = './VGG16_eval.tar'
+        path_E = '..final_tars/eval/VGG16_80.16.tar'
         E_vgg = nn.DataParallel(E_vgg).cuda()
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
@@ -193,51 +193,30 @@ if __name__ == '__main__':
         D.load_state_dict(ckp_D['state_dict'], strict=False)
 
         if args.defense == 'HSIC' or args.defense == 'COCO':
-            hp_ac_list = [
-                # HSIC
-                # 1
-                (0.05, 0.5, 80.35),
-                # (0.05, 1.0, 70.08),
-                # (0.05, 2.5, 56.18),
-                # 2
-                # (0.05, 0.5, 78.89),
-                # (0.05, 1.0, 69.68),
-                # (0.05, 2.5, 56.62),
-            ]
-            for (a1, a2, ac) in hp_ac_list:
-                print("a1:", a1, "a2:", a2, "test_acc:", ac)
 
-                T = model.VGG16(num_classes, True)
-                T = nn.DataParallel(T).cuda()
+            T = model.VGG16(num_classes, True)
+            T = nn.DataParallel(T).cuda()
+            path_T = 'BiDO_teacher_71.92_0.1_0.1.tar'
 
-                model_tar = f"{model_name}_{a1:.3f}&{a2:.3f}_{ac:.2f}.tar"
+            ckp_T = torch.load(path_T)
+            T.load_state_dict(ckp_T['state_dict'], strict=False)
+            E_list.append((T,'white'))
+                    
+            res_all = []
+            ids = 300
+            times = 5
+            ids_per_time = ids // times
+            iden = torch.from_numpy(np.arange(ids_per_time))
+            for idx in range(times):
+                print("--------------------- Attack batch [%s]------------------------------" % idx)
+                res = inversion(args, G, D, T, E_list, iden, iter_times=2000, verbose=True)
+                iden = iden + ids_per_time
 
-                path_T = 'VGG16_0.050_0.200_68.20.tar'
-
-                ckp_T = torch.load(path_T)
-                T.load_state_dict(ckp_T['state_dict'], strict=False)
-                E_list.append((T,'white'))
-                        
-                res_all = []
-                ids = 300
-                times = 5
-                ids_per_time = ids // times
-                iden = torch.from_numpy(np.arange(ids_per_time))
-                for idx in range(times):
-                    print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res = inversion(args, G, D, T, E_list, iden, iter_times=2000, verbose=True)
-                    res_all.append(res)
-                    iden = iden + ids_per_time
-
-                res = np.array(res_all).mean(0)
-                
-                print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-                
 
         else:
             if args.defense == "VIB":
                 path_T_list = [
-                    'VIB.tar'
+                    'VIB_teacher_0.010_62.18.tar'
                 ]
                 for path_T in path_T_list:
                     T = model.VGG16_vib(num_classes)
@@ -256,23 +235,15 @@ if __name__ == '__main__':
                     for idx in range(times):
                         print("--------------------- Attack batch [%s]------------------------------" % idx)
                         res = inversion(args, G, D, T, E_list, iden, iter_times=2000, verbose=True)
-                        res_all.append(res)
                         iden = iden + ids_per_time
 
-                    res = np.array(res_all).mean(0)
-                    print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
+            elif args.defense == 'VGG16':
 
-
-            elif args.defense == 'KD' or args.defense == 'VGG16':
-                if args.defense == 'KD':
-                    path_T = args.defense+'_lastest.tar'
-                else :
-                    path_T = 'VGG16.tar'
+                path_T = '..final_tars/eval/VGG16_80.16.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 
                 T = nn.DataParallel(T).cuda()
-
                 checkpoint = torch.load(path_T)
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'])
@@ -286,9 +257,7 @@ if __name__ == '__main__':
                 for idx in range(times):
                     print("--------------------- Attack batch [%s]------------------------------" % idx)
                     res = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=True)
-                    res_all.append(res)
                     iden = iden + ids_per_time
 
-                res = np.array(res_all).mean(0)
-                print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
+                
 
