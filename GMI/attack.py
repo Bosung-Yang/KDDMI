@@ -113,16 +113,27 @@ def inversion(args, G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, ite
 
     acc = statistics.mean(res['vgg'])
     acc_5 = statistics.mean(res5['vgg'])
+    print()
     print("VGG : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
+
     acc = statistics.mean(res['vib'])
     acc_5 = statistics.mean(res5['vib'])
+    print()
     print("vib : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
+
     acc = statistics.mean(res['hsic'])
     acc_5 = statistics.mean(res5['hsic'])
+    print()
     print("hsic : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
+
     acc = statistics.mean(res['white'])
     acc_5 = statistics.mean(res5['white'])
+    print()
     print("white : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
     return acc, acc_5
 
 
