@@ -78,8 +78,8 @@ def inversion(args, G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, ite
 
 ##################### evaluation ############################
     fake = G(z)
-    res = {'vgg':[], 'vib':[], 'hisc':[], 'kd':[], 'white':[]}
-    res5 = {'vgg':[], 'vib':[], 'hisc':[], 'kd':[], 'white':[]}
+    res = {'vgg':[], 'vib':[], 'hsic':[], 'kd':[], 'white':[]}
+    res5 = {'vgg':[], 'vib':[], 'hsic':[], 'kd':[], 'white':[]}
     for E, model_name in E_list: 
         E.eval()
         eval_prob = E(fake)[-1]
@@ -109,7 +109,6 @@ def inversion(args, G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, ite
         res5[model_name].append(cnt5 * 100.0 / bs)
         torch.cuda.empty_cache()
         interval = time.time() - tf
-        print("{} Time:{:.2f}\tAcc:{:.2f}\t".format(model_name,interval, cnt * 100.0 / bs))
 
     acc = statistics.mean(res['vgg'])
     acc_5 = statistics.mean(res5['vgg'])
