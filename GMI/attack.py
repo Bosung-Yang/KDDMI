@@ -292,7 +292,7 @@ if __name__ == '__main__':
         acc_5 = statistics.mean(res5_vgg)
         acc_var5 = statistics.stdev(res5_vgg)                    
         print('-VGG16-')
-        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.2f}+/- {.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
         print()
 
         acc = statistics.mean(res_vib)
@@ -300,7 +300,7 @@ if __name__ == '__main__':
         acc_5 = statistics.mean(res5_vib)
         acc_var5 = statistics.stdev(res5_vib)                    
         print('-MID-')
-        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.2f}+/- {.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
         print()
 
         acc = statistics.mean(res_hsic)
@@ -308,7 +308,7 @@ if __name__ == '__main__':
         acc_5 = statistics.mean(res5_hsic)
         acc_var5 = statistics.stdev(res5_hsic)                    
         print('-BiDO-')
-        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.2f}+/- {.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
         print()
 
         acc = statistics.mean(res_white)
@@ -316,5 +316,5 @@ if __name__ == '__main__':
         acc_5 = statistics.mean(res5_white)
         acc_var5 = statistics.stdev(res5_white)                    
         print('-Fully-white box-'*20)
-        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.2f}+/- {.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
         print()
