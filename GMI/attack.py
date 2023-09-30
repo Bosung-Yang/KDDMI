@@ -286,6 +286,7 @@ if __name__ == '__main__':
                     #res5_kd.append(res5['kd'])
                     res_white.append(res['white'])
                     res5_white.append(res5['white'])
+        print(res_vgg)
         acc = statistics.mean(res_vgg)
         acc_var = statistics.stdev(res_vgg)
         acc_5 = statistics.mean(res5_vgg)
