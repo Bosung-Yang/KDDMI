@@ -200,6 +200,18 @@ if __name__ == '__main__':
         ckp_D = torch.load(d_path)
         D.load_state_dict(ckp_D['state_dict'], strict=False)
 
+
+        res_vgg = []
+        res5_vgg = []
+        res_vib = []
+        res5_vib = []
+        res_hsic = []
+        res5_hsic = []
+        res_kd = []
+        res5_kd = []
+        res_white = []
+        res5_white = []
+        
         if args.defense == 'HSIC' or args.defense == 'COCO':
 
             T = model.VGG16(num_classes, True)
@@ -242,8 +254,18 @@ if __name__ == '__main__':
                     iden = torch.from_numpy(np.arange(ids_per_time))
                     for idx in range(times):
                         print("--------------------- Attack batch [%s]------------------------------" % idx)
-                        res = inversion(args, G, D, T, E_list, iden, iter_times=2000, verbose=False)
+                        res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
                         iden = iden + ids_per_time
+                        res_vgg.append(res['vgg'][0])
+                        res5_vgg.append(res5['vgg'][0])
+                        res_vib.append(res['vib'][0])
+                        res5_vib.append(res5['vib'][0])
+                        res_hsic.append(res['hsic'][0])
+                        res5_hsic.append(res5['hsic'][0])
+                        #res_kd.append(res['kd'])
+                        #res5_kd.append(res5['kd'])
+                        res_white.append(res['white'][0])
+                        res5_white.append(res5['white'][0])
 
             elif args.defense == 'VGG16':
 
@@ -257,16 +279,6 @@ if __name__ == '__main__':
                 T.load_state_dict(ckp_T['state_dict'])
                 E_list.append((T,'white'))
 
-                res_vgg = []
-                res5_vgg = []
-                res_vib = []
-                res5_vib = []
-                res_hsic = []
-                res5_hsic = []
-                res_kd = []
-                res5_kd = []
-                res_white = []
-                res5_white = []
 
                 ids = 300
                 times = 5
