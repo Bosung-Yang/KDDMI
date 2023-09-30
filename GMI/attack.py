@@ -133,7 +133,7 @@ def inversion(args, G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, ite
     print()
     print("white : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
     print()
-    return acc, acc_5
+    return res, res5
 
 
 if __name__ == '__main__':
@@ -257,15 +257,63 @@ if __name__ == '__main__':
                 T.load_state_dict(ckp_T['state_dict'])
                 E_list.append((T,'white'))
 
-                res_all = []
+                res_vgg = []
+                res5_vgg = []
+                res_vib = []
+                res5_vib = []
+                res_hsic = []
+                res5_hsic = []
+                res_kd = []
+                res5_kd = []
+                res_white = []
+                res5_white = []
+
                 ids = 300
                 times = 5
                 ids_per_time = ids // times
                 iden = torch.from_numpy(np.arange(ids_per_time))
                 for idx in range(times):
                     print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
+                    res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
                     iden = iden + ids_per_time
+                    res_vgg.append(res['vgg'])
+                    res5_vgg.append(res5['vgg'])
+                    res_vib.append(res['vib'])
+                    res5_vib.append(res5['vib'])
+                    res_hsic.append(res['hsic'])
+                    res5_hsic.append(res5['hsic'])
+                    #res_kd.append(res['kd'])
+                    #res5_kd.append(res5['kd'])
+                    res_white.append(res['white'])
+                    res5_white.append(res5['white'])
+        acc = statistics.mean(res_vgg)
+        acc_var = statistics.stdev(res_vgg)
+        acc_5 = statistics.mean(res5_vgg)
+        acc_var5 = statistics.stdev(res5_vgg)                    
+        print('-VGG16-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.2f}+/- {.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
 
-                
+        acc = statistics.mean(res_vib)
+        acc_var = statistics.stdev(res_vib)
+        acc_5 = statistics.mean(res5_vib)
+        acc_var5 = statistics.stdev(res5_vib)                    
+        print('-MID-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.2f}+/- {.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
 
+        acc = statistics.mean(res_hsic)
+        acc_var = statistics.stdev(res_hsic)
+        acc_5 = statistics.mean(res5_hsic)
+        acc_var5 = statistics.stdev(res5_hsic)                    
+        print('-BiDO-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.2f}+/- {.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
+
+        acc = statistics.mean(res_white)
+        acc_var = statistics.stdev(res_white)
+        acc_5 = statistics.mean(res5_white)
+        acc_var5 = statistics.stdev(res5_white)                    
+        print('-Fully-white box-'*20)
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.2f}+/- {.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
