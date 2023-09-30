@@ -315,6 +315,6 @@ if __name__ == '__main__':
         acc_var = statistics.stdev(res_white)
         acc_5 = statistics.mean(res5_white)
         acc_var5 = statistics.stdev(res5_white)                    
-        print('-Fully-white box-'*20)
+        print('-Fully-white box-')
         print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
         print()
