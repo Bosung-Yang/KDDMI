@@ -229,8 +229,18 @@ if __name__ == '__main__':
             iden = torch.from_numpy(np.arange(ids_per_time))
             for idx in range(times):
                 print("--------------------- Attack batch [%s]------------------------------" % idx)
-                res = inversion(args, G, D, T, E_list, iden, iter_times=2000, verbose=False)
+                res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
                 iden = iden + ids_per_time
+                res_vgg.append(res['vgg'][0])
+                res5_vgg.append(res5['vgg'][0])
+                res_vib.append(res['vib'][0])
+                res5_vib.append(res5['vib'][0])
+                res_hsic.append(res['hsic'][0])
+                res5_hsic.append(res5['hsic'][0])
+                #res_kd.append(res['kd'])
+                #res5_kd.append(res5['kd'])
+                res_white.append(res['white'][0])
+                res5_white.append(res5['white'][0])
 
 
         else:
