@@ -137,7 +137,7 @@ def inversion(G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, iter_time
         for i in range(bs):
             gt = iden[i].item()
             sample = fake[i]
-            save_tensor_images(sample.detach(), os.path.join(save_img_dir, "attack_iden_{}_{}.png".format(gt, random_seed)))
+            save_tensor_images(sample.detach(), os.path.join(save_img_dir, "attack_iden_{}.png".format(gt)))
 
             if eval_iden[i].item() == gt:
                 seed_acc[i, random_seed] = 1
