@@ -55,7 +55,7 @@ def inversion(G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, iter_time
     G.eval()
     D.eval()
     T.eval()
-    E.eval()
+
 
     no = torch.zeros(bs) # index for saving all success attack images
 
