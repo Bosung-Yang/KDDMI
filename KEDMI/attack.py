@@ -140,7 +140,7 @@ def inversion(G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, iter_time
             save_tensor_images(sample.detach(), os.path.join(save_img_dir, "attack_iden_{}.png".format(gt)))
 
             if eval_iden[i].item() == gt:
-                seed_acc[i, random_seed] = 1
+                
                 cnt += 1
                 best_img = G(z)[i]
                 no[i] += 1
