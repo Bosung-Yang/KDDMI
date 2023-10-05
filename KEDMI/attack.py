@@ -37,7 +37,7 @@ def reparameterize(mu, logvar):
     return eps * std + mu
 
 
-def inversion(G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500, clip_range=1, improved=True, num_seeds=5, exp_name=' '):
+def inversion(G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=1500, clip_range=1, improved=True, num_seeds=5, exp_name=' '):
     
     device = "cuda"
     num_classes = 1000
@@ -121,10 +121,11 @@ def inversion(G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=150
     interval = time.time() - tf
     
 
-    res = []
-    res5 = []
+    res = {'vgg':[], 'vib':[], 'hsic':[], 'kd':[], 'white':[]}
+    res5 = {'vgg':[], 'vib':[], 'hsic':[], 'kd':[], 'white':[]}
     seed_acc = torch.zeros((bs, 5))
-    for random_seed in range(num_seeds):
+    for E, model_name in E_list: 
+        E.eval()
         tf = time.time()
         z = reparameterize(mu, log_var)
         fake = G(z)
@@ -148,21 +149,38 @@ def inversion(G, D, T, E, iden, lr=2e-2, momentum=0.9, lamda=100, iter_times=150
                 cnt5 += 1
                 
         interval = time.time() - tf
-        res.append(cnt * 1.0 / bs)
-        res5.append(cnt5 * 1.0 / bs)
-
+        res[model_name].append(cnt * 100.0 / bs)
+        res5[model_name].append(cnt5 * 100.0 / bs)
+        
         torch.cuda.empty_cache()
         interval = time.time() - tf
         print("Time:{:.2f}\tAcc:{:.2f}\t".format(interval, cnt * 100.0 / bs))
         
 
-    acc = statistics.mean(res)
-    acc_5 = statistics.mean(res5)
-    acc_var = statistics.stdev(res)
-    acc_var5 = statistics.stdev(res5)
-    print("Acc:{:.2f}\tAcc_5:{:.2f}\tAcc_var:{:.4f}\tacc_var5{:.4f}".format(acc, acc_5, acc_var, acc_var5))
+    acc = statistics.mean(res['vgg'])
+    acc_5 = statistics.mean(res5['vgg'])
+    print()
+    print("VGG : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
 
-    return acc, acc_5, acc_var, acc_var5
+    acc = statistics.mean(res['vib'])
+    acc_5 = statistics.mean(res5['vib'])
+    print()
+    print("vib : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
+
+    acc = statistics.mean(res['hsic'])
+    acc_5 = statistics.mean(res5['hsic'])
+    print()
+    print("hsic : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
+
+    acc = statistics.mean(res['white'])
+    acc_5 = statistics.mean(res5['white'])
+    print()
+    print("white : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
+    return res, res5
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Step2: targeted recovery')
@@ -190,23 +208,29 @@ if __name__ == '__main__':
     if args.dataset == 'celeba':
         model_name = "VGG16"
         num_classes = 1000
-        if args.target=='HSIC':
-            E = model.VGG16(num_classes,True)
-            path_E = '../final_tars/BiDO_teacher_72.75.tar'
-        elif args.target == 'VIB':
-            E = model.VGG16_vib(num_classes)
-            path_E = 'VIB_eval.tar'
-        elif args.target =='VGG16':
-            E = model.VGG16_V(num_classes)
-            path_E = './VGG16_eval.tar'
-        elif args.target =='KD':
-            E = model.VGG16_V(num_classes)
-            path_E = './KD_lastest.tar'
-        E = nn.DataParallel(E).cuda()
-
+        E_hsic = model.VGG16(num_classes,True)
+        path_E = '../final_tars/BiDO_teacher_71.35_0.1_0.1.tar'
+        E_hsic = nn.DataParallel(E_hsic).cuda()
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
-        E.load_state_dict(ckp_E['state_dict'])
+        E_hsic.load_state_dict(ckp_E['state_dict'])
+
+        E_vib = model.VGG16_vib(num_classes)
+        path_E = '../final_tars/VIB_teacher_0.010_60.95.tar'
+        E_vib = nn.DataParallel(E_vib).cuda()
+        checkpoint = torch.load(path_E)
+        ckp_E = torch.load(path_E)
+        E_vib.load_state_dict(ckp_E['state_dict'])
+
+
+        E_vgg = model.VGG16_V(num_classes)
+        path_E = '../final_tars/eval/VGG16_79.23.tar'
+        E_vgg = nn.DataParallel(E_vgg).cuda()
+        checkpoint = torch.load(path_E)
+        ckp_E = torch.load(path_E)
+        E_vgg.load_state_dict(ckp_E['state_dict'])
+
+        E_list = [(E_hsic, 'hsic'), (E_vib,'vib'), (E_vgg, 'vgg')]
         
         g_path = "./KED_G.tar"
         G = generator.Generator()
@@ -220,51 +244,55 @@ if __name__ == '__main__':
         ckp_D = torch.load(d_path)
         D.load_state_dict(ckp_D['state_dict'], strict=False)
 
+        res_vgg = []
+        res5_vgg = []
+        res_vib = []
+        res5_vib = []
+        res_hsic = []
+        res5_hsic = []
+        res_kd = []
+        res5_kd = []
+        res_white = []
+        res5_white = []
+        
         if args.defense == 'HSIC' or args.defense == 'COCO':
-            hp_ac_list = [
-                # HSIC
-                # 1
-                (0.05, 0.5, 80.35),
-                # (0.05, 1.0, 70.08),
-                # (0.05, 2.5, 56.18),
-                # 2
-                # (0.05, 0.5, 78.89),
-                # (0.05, 1.0, 69.68),
-                # (0.05, 2.5, 56.62),
-            ]
-            for (a1, a2, ac) in hp_ac_list:
-                print("a1:", a1, "a2:", a2, "test_acc:", ac)
 
-                T = model.VGG16(num_classes, True)
-                T = nn.DataParallel(T).cuda()
+            T = model.VGG16(num_classes, True)
+            T = nn.DataParallel(T).cuda()
+            path_T = '../final_tars/BiDO_teacher_71.92_0.1_0.1.tar'
 
-                model_tar = f"{model_name}_{a1:.3f}&{a2:.3f}_{ac:.2f}.tar"
-
-                path_T = 'VGG16_0.050_0.200_68.20.tar'
-
-                ckp_T = torch.load(path_T)
-                T.load_state_dict(ckp_T['state_dict'], strict=False)
-                        
-                res_all = []
-                ids = 300
-                times = 5
-                ids_per_time = ids // times
-                iden = torch.from_numpy(np.arange(ids_per_time))
-                for idx in range(times):
-                    print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res = inversion(G, D, T, E, iden, iter_times=2000)
-                    res_all.append(res)
-                    iden = iden + ids_per_time
-
-                res = np.array(res_all).mean(0)
+            ckp_T = torch.load(path_T)
+            T.load_state_dict(ckp_T['state_dict'], strict=False)
+            E_list.append((T,'white'))
+                    
+            res_all = []
+            ids = 300
+            times = 5
+            ids_per_time = ids // times
+            iden = torch.from_numpy(np.arange(ids_per_time))
+            for idx in range(times):
+                print("--------------------- Attack batch [%s]------------------------------" % idx)
+                res,res5 = inversion(G, D, T, E, iden, iter_times=2000)
+                res_all.append(res)
+                iden = iden + ids_per_time
+                                
+                res_vgg.append(res['vgg'][0])
+                res5_vgg.append(res5['vgg'][0])
+                res_vib.append(res['vib'][0])
+                res5_vib.append(res5['vib'][0])
+                res_hsic.append(res['hsic'][0])
+                res5_hsic.append(res5['hsic'][0])
+                #res_kd.append(res['kd'])
+                #res5_kd.append(res5['kd'])
+                res_white.append(res['white'][0])
+                res5_white.append(res5['white'][0])
                 
-                print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
                 
 
         else:
             if args.defense == "VIB":
                 path_T_list = [
-                    'VGG16_vib_beta0.020_51.94.tar'
+                    '../final_tars/VIB_teacher_0.010_62.18.tar'
                 ]
                 for path_T in path_T_list:
                     T = model.VGG16_vib(num_classes)
@@ -273,32 +301,41 @@ if __name__ == '__main__':
                     checkpoint = torch.load(path_T)
                     ckp_T = torch.load(path_T)
                     T.load_state_dict(ckp_T['state_dict'])
+                    E_list.append((T,'white'))
 
                     res_all = []
                     ids = 300
                     times = 5
                     ids_per_time = ids // times
                     iden = torch.from_numpy(np.arange(ids_per_time))
+                    
                     for idx in range(times):
                         print("--------------------- Attack batch [%s]------------------------------" % idx)
-                        res = inversion( G, D, T, E, iden, iter_times=2000)
-                        res_all.append(res)
+                        res,res5 = inversion( G, D, T, E, iden, iter_times=2000)
                         iden = iden + ids_per_time
+                        res_vgg.append(res['vgg'][0])
+                        res5_vgg.append(res5['vgg'][0])
+                        res_vib.append(res['vib'][0])
+                        res5_vib.append(res5['vib'][0])
+                        res_hsic.append(res['hsic'][0])
+                        res5_hsic.append(res5['hsic'][0])
+                        #res_kd.append(res['kd'])
+                        #res5_kd.append(res5['kd'])
+                        res_white.append(res['white'][0])
+                        res5_white.append(res5['white'][0])
 
-                    res = np.array(res_all).mean(0)
-                    print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
 
+            elif args.defense == 'VGG16':
 
-            else:
-                path_T = args.defense+'_lastest.tar'
+                path_T = '../final_tars/eval/VGG16_80.16.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 
                 T = nn.DataParallel(T).cuda()
-
                 checkpoint = torch.load(path_T)
                 ckp_T = torch.load(path_T)
                 T.load_state_dict(ckp_T['state_dict'])
+                E_list.append((T,'white'))
 
                 res_all = []
                 ids = 300
@@ -307,13 +344,49 @@ if __name__ == '__main__':
                 iden = torch.from_numpy(np.arange(ids_per_time))
                 for idx in range(times):
                     print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res = inversion( G, D, T, E, iden, lr=2e-2, iter_times=2000)
-                    res_all.append(res)
+                    res, res5 = inversion( G, D, T, E, iden, lr=2e-2, iter_times=2000)
                     iden = iden + ids_per_time
+                    res_vgg.append(res['vgg'][0])
+                    res5_vgg.append(res5['vgg'][0])
+                    res_vib.append(res['vib'][0])
+                    res5_vib.append(res5['vib'][0])
+                    res_hsic.append(res['hsic'][0])
+                    res5_hsic.append(res5['hsic'][0])
+                    #res_kd.append(res['kd'])
+                    #res5_kd.append(res5['kd'])
+                    res_white.append(res['white'][0])
+                    res5_white.append(res5['white'][0])
 
-                res = np.array(res_all).mean(0)
-                print(f"Acc:{res[0]:.4f} (+/- {res[2]:.4f}), Acc5:{res[1]:.4f} (+/- {res[3]:.4f})")
-        mlflow.log_metric("Top1", res[0]*100)
-        mlflow.log_metric('top1-std', res[2]*100)
-        mlflow.log_metric("Top5", res[1]*100)
-        mlflow.log_metric('top5_std', res[3]*100)
+                
+        print(res_vgg)
+        acc = statistics.mean(res_vgg)
+        acc_var = statistics.stdev(res_vgg)
+        acc_5 = statistics.mean(res5_vgg)
+        acc_var5 = statistics.stdev(res5_vgg)                    
+        print('-VGG16-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
+
+        acc = statistics.mean(res_vib)
+        acc_var = statistics.stdev(res_vib)
+        acc_5 = statistics.mean(res5_vib)
+        acc_var5 = statistics.stdev(res5_vib)                    
+        print('-MID-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
+
+        acc = statistics.mean(res_hsic)
+        acc_var = statistics.stdev(res_hsic)
+        acc_5 = statistics.mean(res5_hsic)
+        acc_var5 = statistics.stdev(res5_hsic)                    
+        print('-BiDO-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
+
+        acc = statistics.mean(res_white)
+        acc_var = statistics.stdev(res_white)
+        acc_5 = statistics.mean(res5_white)
+        acc_var5 = statistics.stdev(res5_white)                    
+        print('-Fully-white box-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
