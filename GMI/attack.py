@@ -323,7 +323,7 @@ if __name__ == '__main__':
 
         if args.defense == 'kd':
 
-          path_T = '../final_tars/student-BiDO_73.28.tar'
+          path_T = '../final_tars/student-BiDO_74.41.tar'
           # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
           T = model.VGG16_V(num_classes)
 
