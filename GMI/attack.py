@@ -198,7 +198,7 @@ if __name__ == '__main__':
         ckp_E = torch.load(path_E)
         E_kd.load_state_dict(ckp_E['state_dict'])
 
-        E_list = [(E_hsic, 'hsic'), (E_vib,'vib'), (E_vgg, 'vgg'), (E_kd,'kd'))]
+        E_list = [(E_hsic, 'hsic'), (E_vib,'vib'), (E_vgg, 'vgg'), (E_kd,'kd')]
 
         
         g_path = "./G.tar"
