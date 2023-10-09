@@ -192,7 +192,7 @@ if __name__ == '__main__':
         E_vgg.load_state_dict(ckp_E['state_dict'])
 
         E_kd = model.VGG16_V(num_classes)
-        path_E = '../final_tars/eval/student-BiDO_73.28.tar'
+        path_E = '../final_tars/student-BiDO_73.28.tar'
         E_kd = nn.DataParallel(E_vgg).cuda()
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
@@ -323,7 +323,7 @@ if __name__ == '__main__':
 
         if args.defense == 'kd':
 
-          path_T = '../final_tars/eval/student-BiDO_73.28.tar'
+          path_T = '../final_tars/student-BiDO_73.28.tar'
           # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
           T = model.VGG16_V(num_classes)
 
