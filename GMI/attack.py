@@ -131,7 +131,7 @@ def inversion(args, G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, ite
     acc = statistics.mean(res['kd'])
     acc_5 = statistics.mean(res5['kd'])
     print()
-    print("white : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print("KD : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
     print()
                 
     acc = statistics.mean(res['white'])
@@ -250,8 +250,8 @@ if __name__ == '__main__':
                 res5_vib.append(res5['vib'][0])
                 res_hsic.append(res['hsic'][0])
                 res5_hsic.append(res5['hsic'][0])
-                res_kd.append(res['kd'])
-                res5_kd.append(res5['kd'])
+                res_kd.append(res['kd'][0])
+                res5_kd.append(res5['kd'][0])
                 res_white.append(res['white'][0])
                 res5_white.append(res5['white'][0])
 
@@ -284,8 +284,8 @@ if __name__ == '__main__':
                     res5_vib.append(res5['vib'][0])
                     res_hsic.append(res['hsic'][0])
                     res5_hsic.append(res5['hsic'][0])
-                    res_kd.append(res['kd'])
-                    res5_kd.append(res5['kd'])
+                    res_kd.append(res['kd'][0])
+                    res5_kd.append(res5['kd'][0])
                     res_white.append(res['white'][0])
                     res5_white.append(res5['white'][0])
 
@@ -316,8 +316,8 @@ if __name__ == '__main__':
               res5_vib.append(res5['vib'][0])
               res_hsic.append(res['hsic'][0])
               res5_hsic.append(res5['hsic'][0])
-              res_kd.append(res['kd'])
-              res5_kd.append(res5['kd'])
+              res_kd.append(res['kd'][0])
+              res5_kd.append(res5['kd'][0])
               res_white.append(res['white'][0])
               res5_white.append(res5['white'][0])
 
@@ -348,8 +348,8 @@ if __name__ == '__main__':
               res5_vib.append(res5['vib'][0])
               res_hsic.append(res['hsic'][0])
               res5_hsic.append(res5['hsic'][0])
-              res_kd.append(res['kd'])
-              res5_kd.append(res5['kd'])
+              res_kd.append(res['kd'][0])
+              res5_kd.append(res5['kd'][0])
               res_white.append(res['white'][0])
               res5_white.append(res5['white'][0])
               
@@ -377,7 +377,15 @@ if __name__ == '__main__':
         print('-BiDO-')
         print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
         print()
-
+      
+        acc = statistics.mean(res_kd)
+        acc_var = statistics.stdev(res_kd)
+        acc_5 = statistics.mean(res5_kd)
+        acc_var5 = statistics.stdev(res5_kd)                    
+        print('-KD-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
+      
         acc = statistics.mean(res_white)
         acc_var = statistics.stdev(res_white)
         acc_5 = statistics.mean(res5_white)
