@@ -256,103 +256,102 @@ if __name__ == '__main__':
                 res5_white.append(res5['white'][0])
 
 
-        else:
-            if args.defense == "VIB":
-                path_T_list = [
-                    '../final_tars/VIB_teacher_0.010_62.18.tar'
-                ]
-                for path_T in path_T_list:
-                    T = model.VGG16_vib(num_classes)
-                    T = nn.DataParallel(T).cuda()
+          if args.defense == "VIB":
+              path_T_list = [
+                  '../final_tars/VIB_teacher_0.010_62.18.tar'
+              ]
+              for path_T in path_T_list:
+                  T = model.VGG16_vib(num_classes)
+                  T = nn.DataParallel(T).cuda()
 
-                    checkpoint = torch.load(path_T)
-                    ckp_T = torch.load(path_T)
-                    T.load_state_dict(ckp_T['state_dict'])
-                    E_list.append((T,'white'))
+                  checkpoint = torch.load(path_T)
+                  ckp_T = torch.load(path_T)
+                  T.load_state_dict(ckp_T['state_dict'])
+                  E_list.append((T,'white'))
 
-                    res_all = []
-                    ids = 300
-                    times = 5
-                    ids_per_time = ids // times
-                    iden = torch.from_numpy(np.arange(ids_per_time))
-                    for idx in range(times):
-                        print("--------------------- Attack batch [%s]------------------------------" % idx)
-                        res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
-                        iden = iden + ids_per_time
-                        res_vgg.append(res['vgg'][0])
-                        res5_vgg.append(res5['vgg'][0])
-                        res_vib.append(res['vib'][0])
-                        res5_vib.append(res5['vib'][0])
-                        res_hsic.append(res['hsic'][0])
-                        res5_hsic.append(res5['hsic'][0])
-                        res_kd.append(res['kd'])
-                        res5_kd.append(res5['kd'])
-                        res_white.append(res['white'][0])
-                        res5_white.append(res5['white'][0])
+                  res_all = []
+                  ids = 300
+                  times = 5
+                  ids_per_time = ids // times
+                  iden = torch.from_numpy(np.arange(ids_per_time))
+                  for idx in range(times):
+                      print("--------------------- Attack batch [%s]------------------------------" % idx)
+                      res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
+                      iden = iden + ids_per_time
+                      res_vgg.append(res['vgg'][0])
+                      res5_vgg.append(res5['vgg'][0])
+                      res_vib.append(res['vib'][0])
+                      res5_vib.append(res5['vib'][0])
+                      res_hsic.append(res['hsic'][0])
+                      res5_hsic.append(res5['hsic'][0])
+                      res_kd.append(res['kd'])
+                      res5_kd.append(res5['kd'])
+                      res_white.append(res['white'][0])
+                      res5_white.append(res5['white'][0])
 
-              elif args.defense == 'VGG16':
+            if args.defense == 'VGG16':
 
-                path_T = '../final_tars/eval/VGG16_80.16.tar'
-                # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
-                T = model.VGG16_V(num_classes)
+              path_T = '../final_tars/eval/VGG16_80.16.tar'
+              # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
+              T = model.VGG16_V(num_classes)
 
-                T = nn.DataParallel(T).cuda()
-                checkpoint = torch.load(path_T)
-                ckp_T = torch.load(path_T)
-                T.load_state_dict(ckp_T['state_dict'])
-                E_list.append((T,'white'))
-
-
-                ids = 300
-                times = 5
-                ids_per_time = ids // times
-                iden = torch.from_numpy(np.arange(ids_per_time))
-                for idx in range(times):
-                    print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
-                    iden = iden + ids_per_time
-                    res_vgg.append(res['vgg'][0])
-                    res5_vgg.append(res5['vgg'][0])
-                    res_vib.append(res['vib'][0])
-                    res5_vib.append(res5['vib'][0])
-                    res_hsic.append(res['hsic'][0])
-                    res5_hsic.append(res5['hsic'][0])
-                    res_kd.append(res['kd'])
-                    res5_kd.append(res5['kd'])
-                    res_white.append(res['white'][0])
-                    res5_white.append(res5['white'][0])
-
-              elif args.defense == 'kd':
-
-                path_T = '../final_tars/eval/student-BiDO_73.28.tar'
-                # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
-                T = model.VGG16_V(num_classes)
-
-                T = nn.DataParallel(T).cuda()
-                checkpoint = torch.load(path_T)
-                ckp_T = torch.load(path_T)
-                T.load_state_dict(ckp_T['state_dict'])
-                E_list.append((T,'white'))
+              T = nn.DataParallel(T).cuda()
+              checkpoint = torch.load(path_T)
+              ckp_T = torch.load(path_T)
+              T.load_state_dict(ckp_T['state_dict'])
+              E_list.append((T,'white'))
 
 
-                ids = 300
-                times = 5
-                ids_per_time = ids // times
-                iden = torch.from_numpy(np.arange(ids_per_time))
-                for idx in range(times):
-                    print("--------------------- Attack batch [%s]------------------------------" % idx)
-                    res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
-                    iden = iden + ids_per_time
-                    res_vgg.append(res['vgg'][0])
-                    res5_vgg.append(res5['vgg'][0])
-                    res_vib.append(res['vib'][0])
-                    res5_vib.append(res5['vib'][0])
-                    res_hsic.append(res['hsic'][0])
-                    res5_hsic.append(res5['hsic'][0])
-                    res_kd.append(res['kd'])
-                    res5_kd.append(res5['kd'])
-                    res_white.append(res['white'][0])
-                    res5_white.append(res5['white'][0])
+              ids = 300
+              times = 5
+              ids_per_time = ids // times
+              iden = torch.from_numpy(np.arange(ids_per_time))
+              for idx in range(times):
+                  print("--------------------- Attack batch [%s]------------------------------" % idx)
+                  res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
+                  iden = iden + ids_per_time
+                  res_vgg.append(res['vgg'][0])
+                  res5_vgg.append(res5['vgg'][0])
+                  res_vib.append(res['vib'][0])
+                  res5_vib.append(res5['vib'][0])
+                  res_hsic.append(res['hsic'][0])
+                  res5_hsic.append(res5['hsic'][0])
+                  res_kd.append(res['kd'])
+                  res5_kd.append(res5['kd'])
+                  res_white.append(res['white'][0])
+                  res5_white.append(res5['white'][0])
+
+            if args.defense == 'kd':
+
+              path_T = '../final_tars/eval/student-BiDO_73.28.tar'
+              # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
+              T = model.VGG16_V(num_classes)
+
+              T = nn.DataParallel(T).cuda()
+              checkpoint = torch.load(path_T)
+              ckp_T = torch.load(path_T)
+              T.load_state_dict(ckp_T['state_dict'])
+              E_list.append((T,'white'))
+
+
+              ids = 300
+              times = 5
+              ids_per_time = ids // times
+              iden = torch.from_numpy(np.arange(ids_per_time))
+              for idx in range(times):
+                  print("--------------------- Attack batch [%s]------------------------------" % idx)
+                  res, res5 = inversion(args, G, D, T, E_list, iden, lr=2e-2, iter_times=2000, verbose=False)
+                  iden = iden + ids_per_time
+                  res_vgg.append(res['vgg'][0])
+                  res5_vgg.append(res5['vgg'][0])
+                  res_vib.append(res['vib'][0])
+                  res5_vib.append(res5['vib'][0])
+                  res_hsic.append(res['hsic'][0])
+                  res5_hsic.append(res5['hsic'][0])
+                  res_kd.append(res['kd'])
+                  res5_kd.append(res5['kd'])
+                  res_white.append(res['white'][0])
+                  res5_white.append(res5['white'][0])
                   
         print(res_vgg)
         acc = statistics.mean(res_vgg)
