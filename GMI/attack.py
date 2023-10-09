@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
         E_kd = model.VGG16_V(num_classes)
         path_E = '../final_tars/student-BiDO_73.28.tar'
-        E_kd = nn.DataParallel(E_vgg).cuda()
+        E_kd = nn.DataParallel(E_kd).cuda()
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
         E_kd.load_state_dict(ckp_E['state_dict'])
