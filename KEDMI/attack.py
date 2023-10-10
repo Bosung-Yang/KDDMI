@@ -369,9 +369,9 @@ if __name__ == '__main__':
                     res5_kd.append(res5['kd'][0])
                     res_white.append(res['white'][0])
                     res5_white.append(res5['white'][0])
-            elif args.defense == 'VGG16':
+            elif args.defense == 'kd':
 
-                path_T = '../final_tars/eval/VGG16_80.16.tar'
+                path_T = '../final_tars/student-BiDO_74.41.tar'
                 # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
                 T = model.VGG16_V(num_classes)
 
