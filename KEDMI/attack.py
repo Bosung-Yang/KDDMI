@@ -235,14 +235,6 @@ if __name__ == '__main__':
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
         E_vgg.load_state_dict(ckp_E['state_dict'])
-
-        E_list = [(E_hsic, 'hsic'), (E_vib,'vib'), (E_vgg, 'vgg')]
-        
-        g_path = "./KED_G.tar"
-        G = generator.Generator()
-        G = nn.DataParallel(G).cuda()
-        ckp_G = torch.load(g_path)
-        G.load_state_dict(ckp_G['state_dict'], strict=False)
         
         E_kd = model.VGG16_V(num_classes)
         path_E = '../final_tars/student-BiDO_73.28.tar'
@@ -250,6 +242,16 @@ if __name__ == '__main__':
         checkpoint = torch.load(path_E)
         ckp_E = torch.load(path_E)
         E_kd.load_state_dict(ckp_E['state_dict'])
+        
+        E_list = [(E_hsic, 'hsic'), (E_vib,'vib'), (E_vgg, 'vgg'), (E_kd,'kd')]
+        
+        g_path = "./KED_G.tar"
+        G = generator.Generator()
+        G = nn.DataParallel(G).cuda()
+        ckp_G = torch.load(g_path)
+        G.load_state_dict(ckp_G['state_dict'], strict=False)
+        
+
         
         d_path = "./KED_D.tar"
         D = discri.MinibatchDiscriminator()
