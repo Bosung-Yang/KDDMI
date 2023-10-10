@@ -174,6 +174,12 @@ def inversion(G, D, T, E_list, iden, lr=2e-2, momentum=0.9, lamda=100, iter_time
     print()
     print("hsic : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
     print()
+        
+    acc = statistics.mean(res['kd'])
+    acc_5 = statistics.mean(res5['kd'])
+    print()
+    print("white : Acc:{:.2f}\tAcc_5:{:.2f}".format(acc, acc_5))
+    print()
 
     acc = statistics.mean(res['white'])
     acc_5 = statistics.mean(res5['white'])
@@ -237,7 +243,14 @@ if __name__ == '__main__':
         G = nn.DataParallel(G).cuda()
         ckp_G = torch.load(g_path)
         G.load_state_dict(ckp_G['state_dict'], strict=False)
-
+        
+        E_kd = model.VGG16_V(num_classes)
+        path_E = '../final_tars/student-BiDO_73.28.tar'
+        E_kd = nn.DataParallel(E_kd).cuda()
+        checkpoint = torch.load(path_E)
+        ckp_E = torch.load(path_E)
+        E_kd.load_state_dict(ckp_E['state_dict'])
+        
         d_path = "./KED_D.tar"
         D = discri.MinibatchDiscriminator()
         D = nn.DataParallel(D).cuda()
@@ -282,8 +295,8 @@ if __name__ == '__main__':
                 res5_vib.append(res5['vib'][0])
                 res_hsic.append(res['hsic'][0])
                 res5_hsic.append(res5['hsic'][0])
-                #res_kd.append(res['kd'])
-                #res5_kd.append(res5['kd'])
+                res_kd.append(res['kd'][0])
+                res5_kd.append(res5['kd'][0])
                 res_white.append(res['white'][0])
                 res5_white.append(res5['white'][0])
                 
@@ -319,8 +332,8 @@ if __name__ == '__main__':
                         res5_vib.append(res5['vib'][0])
                         res_hsic.append(res['hsic'][0])
                         res5_hsic.append(res5['hsic'][0])
-                        #res_kd.append(res['kd'])
-                        #res5_kd.append(res5['kd'])
+                        res_kd.append(res['kd'][0])
+                        res5_kd.append(res5['kd'][0])
                         res_white.append(res['white'][0])
                         res5_white.append(res5['white'][0])
 
@@ -352,8 +365,39 @@ if __name__ == '__main__':
                     res5_vib.append(res5['vib'][0])
                     res_hsic.append(res['hsic'][0])
                     res5_hsic.append(res5['hsic'][0])
-                    #res_kd.append(res['kd'])
-                    #res5_kd.append(res5['kd'])
+                    res_kd.append(res['kd'][0])
+                    res5_kd.append(res5['kd'][0])
+                    res_white.append(res['white'][0])
+                    res5_white.append(res5['white'][0])
+            elif args.defense == 'VGG16':
+
+                path_T = '../final_tars/eval/VGG16_80.16.tar'
+                # path_T = os.path.join(args.model_path, args.dataset, args.defense, "VGG16_reg_87.27.tar")
+                T = model.VGG16_V(num_classes)
+
+                T = nn.DataParallel(T).cuda()
+                checkpoint = torch.load(path_T)
+                ckp_T = torch.load(path_T)
+                T.load_state_dict(ckp_T['state_dict'])
+                E_list.append((T,'white'))
+
+                res_all = []
+                ids = 300
+                times = 5
+                ids_per_time = ids // times
+                iden = torch.from_numpy(np.arange(ids_per_time))
+                for idx in range(times):
+                    print("--------------------- Attack batch [%s]------------------------------" % idx)
+                    res, res5 = inversion( G, D, T, E_list, iden, lr=2e-2, iter_times=2000)
+                    iden = iden + ids_per_time
+                    res_vgg.append(res['vgg'][0])
+                    res5_vgg.append(res5['vgg'][0])
+                    res_vib.append(res['vib'][0])
+                    res5_vib.append(res5['vib'][0])
+                    res_hsic.append(res['hsic'][0])
+                    res5_hsic.append(res5['hsic'][0])
+                    res_kd.append(res['kd'][0])
+                    res5_kd.append(res5['kd'][0])
                     res_white.append(res['white'][0])
                     res5_white.append(res5['white'][0])
 
@@ -382,7 +426,15 @@ if __name__ == '__main__':
         print('-BiDO-')
         print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
         print()
-
+        
+        acc = statistics.mean(res_kd)
+        acc_var = statistics.stdev(res_kd)
+        acc_5 = statistics.mean(res5_kd)
+        acc_var5 = statistics.stdev(res5_kd)                    
+        print('-KD-')
+        print("VGG : Acc:{:.4f} +/- {:.4f}\tAcc_5:{:.4f}+/- {:.4f}".format(acc,acc_var, acc_5,acc_var5))
+        print()
+        
         acc = statistics.mean(res_white)
         acc_var = statistics.stdev(res_white)
         acc_5 = statistics.mean(res5_white)
