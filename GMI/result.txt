@@ -1,0 +1,157 @@
+--------------------- Attack batch [0]------------------------------
+Traceback (most recent call last):
+  File "attack.py", line 232, in <module>
+    res = inversion(args, G, D, T, E_list, iden, iter_times=2000, verbose=True)
+  File "attack.py", line 70, in inversion
+    eval_prob = E(fake_img)[-1]
+UnboundLocalError: local variable 'E' referenced before assignment
+--------------------- Attack batch [0]------------------------------
+
+VGG : Acc:8.33	Acc_5:11.67
+
+
+vib : Acc:3.33	Acc_5:11.67
+
+
+hsic : Acc:20.00	Acc_5:48.33
+
+
+white : Acc:100.00	Acc_5:100.00
+
+--------------------- Attack batch [1]------------------------------
+
+VGG : Acc:3.33	Acc_5:11.67
+
+
+vib : Acc:1.67	Acc_5:13.33
+
+
+hsic : Acc:31.67	Acc_5:53.33
+
+
+white : Acc:100.00	Acc_5:100.00
+
+--------------------- Attack batch [2]------------------------------
+
+VGG : Acc:1.67	Acc_5:11.67
+
+
+vib : Acc:1.67	Acc_5:8.33
+
+
+hsic : Acc:20.00	Acc_5:40.00
+
+
+white : Acc:100.00	Acc_5:100.00
+
+--------------------- Attack batch [3]------------------------------
+
+VGG : Acc:6.67	Acc_5:16.67
+
+
+vib : Acc:0.00	Acc_5:1.67
+
+
+hsic : Acc:20.00	Acc_5:43.33
+
+
+white : Acc:100.00	Acc_5:100.00
+
+--------------------- Attack batch [4]------------------------------
+
+VGG : Acc:0.00	Acc_5:5.00
+
+
+vib : Acc:1.67	Acc_5:8.33
+
+
+hsic : Acc:13.33	Acc_5:36.67
+
+
+white : Acc:100.00	Acc_5:100.00
+
+[]
+Traceback (most recent call last):
+  File "attack.py", line 302, in <module>
+    acc = statistics.mean(res_vgg)
+  File "/opt/conda/lib/python3.8/statistics.py", line 315, in mean
+    raise StatisticsError('mean requires at least one data point')
+statistics.StatisticsError: mean requires at least one data point
+--------------------- Attack batch [0]------------------------------
+
+VGG : Acc:5.00	Acc_5:13.33
+
+
+vib : Acc:3.33	Acc_5:6.67
+
+
+hsic : Acc:23.33	Acc_5:48.33
+
+
+white : Acc:100.00	Acc_5:100.00
+
+--------------------- Attack batch [1]------------------------------
+
+VGG : Acc:3.33	Acc_5:18.33
+
+
+vib : Acc:3.33	Acc_5:10.00
+
+
+hsic : Acc:26.67	Acc_5:51.67
+
+
+white : Acc:100.00	Acc_5:100.00
+
+--------------------- Attack batch [2]------------------------------
+
+VGG : Acc:1.67	Acc_5:10.00
+
+
+vib : Acc:1.67	Acc_5:5.00
+
+
+hsic : Acc:21.67	Acc_5:35.00
+
+
+white : Acc:100.00	Acc_5:100.00
+
+--------------------- Attack batch [3]------------------------------
+
+VGG : Acc:5.00	Acc_5:15.00
+
+
+vib : Acc:0.00	Acc_5:6.67
+
+
+hsic : Acc:18.33	Acc_5:40.00
+
+
+white : Acc:100.00	Acc_5:100.00
+
+--------------------- Attack batch [4]------------------------------
+
+VGG : Acc:0.00	Acc_5:8.33
+
+
+vib : Acc:1.67	Acc_5:5.00
+
+
+hsic : Acc:16.67	Acc_5:40.00
+
+
+white : Acc:100.00	Acc_5:100.00
+
+[5.0, 3.3333333333333335, 1.6666666666666667, 5.0, 0.0]
+-VGG16-
+VGG : Acc:3.0000 +/- 2.1731	Acc_5:13.0000+/- 3.9791
+
+-MID-
+VGG : Acc:2.0000 +/- 1.3944	Acc_5:6.6667+/- 2.0412
+
+-BiDO-
+VGG : Acc:21.3333 +/- 3.9791	Acc_5:43.0000+/- 6.8109
+
+-Fully-white box-
+VGG : Acc:100.0000 +/- 0.0000	Acc_5:100.0000+/- 0.0000
+

@@ -290,7 +290,7 @@ if __name__ == '__main__':
 
     parser = ArgumentParser(description='Defense against MI')
     parser.add_argument('--dataset', default='celeba')
-    parser.add_argument('--defense')
+    parser.add_argument('--defense', default='VIB')
     parser.add_argument('--root_path', default='/workspace/data/', help='')
     parser.add_argument('--model_dir', default='./target_model', help='')
     parser.add_argument('--nclass', type=int , default=1000)
