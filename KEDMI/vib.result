@@ -1,98 +1,121 @@
 --------------------- Attack batch [0]------------------------------
-Time:0.18	Acc:13.33	
+Time:0.17	Acc:11.67	
 Time:0.32	Acc:41.67	
-Time:0.24	Acc:25.00	
-Time:0.61	Acc:100.00	
+Time:0.22	Acc:21.67	
+Time:0.22	Acc:21.67	
+Time:0.62	Acc:100.00	
 
-VGG : Acc:25.00	Acc_5:58.33
-
-
-vib : Acc:41.67	Acc_5:66.67
+VGG : Acc:21.67	Acc_5:63.33
 
 
-hsic : Acc:13.33	Acc_5:28.33
+vib : Acc:41.67	Acc_5:65.00
+
+
+hsic : Acc:11.67	Acc_5:28.33
+
+
+white : Acc:21.67	Acc_5:56.67
 
 
 white : Acc:100.00	Acc_5:100.00
 
 --------------------- Attack batch [1]------------------------------
-Time:0.15	Acc:10.00	
-Time:0.31	Acc:40.00	
-Time:0.25	Acc:28.33	
-Time:0.61	Acc:98.33	
+Time:0.18	Acc:13.33	
+Time:0.28	Acc:33.33	
+Time:0.23	Acc:23.33	
+Time:0.26	Acc:30.00	
+Time:0.59	Acc:95.00	
 
-VGG : Acc:28.33	Acc_5:58.33
-
-
-vib : Acc:40.00	Acc_5:70.00
+VGG : Acc:23.33	Acc_5:55.00
 
 
-hsic : Acc:10.00	Acc_5:26.67
+vib : Acc:33.33	Acc_5:65.00
 
 
-white : Acc:98.33	Acc_5:100.00
+hsic : Acc:13.33	Acc_5:35.00
+
+
+white : Acc:30.00	Acc_5:58.33
+
+
+white : Acc:95.00	Acc_5:100.00
 
 --------------------- Attack batch [2]------------------------------
-Time:0.18	Acc:13.33	
-Time:0.30	Acc:38.33	
-Time:0.30	Acc:36.67	
-Time:0.60	Acc:96.67	
+Time:0.17	Acc:13.33	
+Time:0.26	Acc:30.00	
+Time:0.28	Acc:35.00	
+Time:0.24	Acc:26.67	
+Time:0.61	Acc:100.00	
 
-VGG : Acc:36.67	Acc_5:56.67
-
-
-vib : Acc:38.33	Acc_5:63.33
+VGG : Acc:35.00	Acc_5:61.67
 
 
-hsic : Acc:13.33	Acc_5:28.33
+vib : Acc:30.00	Acc_5:55.00
 
 
-white : Acc:96.67	Acc_5:96.67
+hsic : Acc:13.33	Acc_5:35.00
+
+
+white : Acc:26.67	Acc_5:48.33
+
+
+white : Acc:100.00	Acc_5:100.00
 
 --------------------- Attack batch [3]------------------------------
-Time:0.18	Acc:13.33	
-Time:0.31	Acc:40.00	
-Time:0.22	Acc:23.33	
+Time:0.20	Acc:18.33	
+Time:0.33	Acc:43.33	
+Time:0.24	Acc:26.67	
+Time:0.24	Acc:26.67	
 Time:0.61	Acc:98.33	
 
-VGG : Acc:23.33	Acc_5:61.67
+VGG : Acc:26.67	Acc_5:65.00
 
 
-vib : Acc:40.00	Acc_5:73.33
+vib : Acc:43.33	Acc_5:76.67
 
 
-hsic : Acc:13.33	Acc_5:38.33
+hsic : Acc:18.33	Acc_5:41.67
+
+
+white : Acc:26.67	Acc_5:48.33
 
 
 white : Acc:98.33	Acc_5:100.00
 
 --------------------- Attack batch [4]------------------------------
-Time:0.15	Acc:8.33	
-Time:0.26	Acc:30.00	
-Time:0.26	Acc:30.00	
-Time:0.62	Acc:100.00	
+Time:0.16	Acc:10.00	
+Time:0.32	Acc:41.67	
+Time:0.28	Acc:33.33	
+Time:0.24	Acc:26.67	
+Time:0.60	Acc:96.67	
 
-VGG : Acc:30.00	Acc_5:53.33
-
-
-vib : Acc:30.00	Acc_5:60.00
+VGG : Acc:33.33	Acc_5:58.33
 
 
-hsic : Acc:8.33	Acc_5:28.33
+vib : Acc:41.67	Acc_5:71.67
 
 
-white : Acc:100.00	Acc_5:100.00
+hsic : Acc:10.00	Acc_5:35.00
 
-[25.0, 28.333333333333332, 36.666666666666664, 23.333333333333332, 30.0]
+
+white : Acc:26.67	Acc_5:55.00
+
+
+white : Acc:96.67	Acc_5:98.33
+
+[21.666666666666668, 23.333333333333332, 35.0, 26.666666666666668, 33.333333333333336]
 -VGG16-
-VGG : Acc:28.6667 +/- 5.1908	Acc_5:57.6667+/- 3.0277
+VGG : Acc:28.0000 +/- 5.9395	Acc_5:60.6667+/- 4.0139
 
 -MID-
-VGG : Acc:38.0000 +/- 4.6248	Acc_5:66.6667+/- 5.2705
+VGG : Acc:38.0000 +/- 5.9395	Acc_5:66.6667+/- 8.1650
 
 -BiDO-
-VGG : Acc:11.6667 +/- 2.3570	Acc_5:30.0000+/- 4.7140
+VGG : Acc:13.3333 +/- 3.1180	Acc_5:35.0000+/- 4.7140
+
+-KD-
+VGG : Acc:26.3333 +/- 2.9814	Acc_5:53.3333+/- 4.7140
 
 -Fully-white box-
-VGG : Acc:98.6667 +/- 1.3944	Acc_5:99.3333+/- 1.4907
+VGG : Acc:98.0000 +/- 2.1731	Acc_5:99.6667+/- 0.7454
 
