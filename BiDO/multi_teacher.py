@@ -62,7 +62,7 @@ def KD(args, n_classes, trainloader, testloader):
             #vt_loss = nn.KLDivLoss(out_logit, vt_output)
             vt_loss = nn.MSELoss()(out_logit, vt_output)
             ht_loss = nn.MSELoss()(out_logit, ht_output)
-            loss = cls_loss + 0.01 * vt_loss + 0.001 * ht_loss
+            loss = cls_loss #+ 0.01 * vt_loss + 0.001 * ht_loss
             loss.backward()
             optimizer.step()
         #train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
