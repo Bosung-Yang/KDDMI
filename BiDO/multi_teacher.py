@@ -49,8 +49,10 @@ def KD(args, n_classes, trainloader, testloader):
     best_ACC = -1
     for epoch in range(n_epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
-        pbar = tqdm(enumerate(trainloader), total=len(trainloader), ncols=10)
+        pbar = tqdm(enumerate(trainloader), total=len(trainloader), ncols=100)
         for batch_idx, (inputs, iden) in pbar:
+            net.train()
+            optimizer.zero_grad()
             inputs, iden = inputs.to(device), iden.to(device)
             iden = iden.view(-1)
             feats, out_logit = net(inputs)
