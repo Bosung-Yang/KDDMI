@@ -128,5 +128,5 @@ if __name__ == '__main__':
     test_images = datasets.ImageFolder(data_path+test_folder,image_transforms['test'])
     test_loader = torch.utils.data.DataLoader(test_images, batch_size = 64 ,num_workers=4,shuffle=True) 
  
-
+    KD(args, 1000, trainloader, testloader)
     
