@@ -53,7 +53,7 @@ def KD(args, n_classes, trainloader, testloader):
         for batch_idx, (inputs, iden) in pbar:
             inputs, iden = inputs.to(device), iden.to(device)
             iden = iden.view(-1)
-            feats, out_logit = model(inputs)
+            feats, out_logit = net(inputs)
             _, vt_output = vanilla_teacher(inputs)
             _, ht_output = HSIC_teacher(inputs)
             cls_loss = F.cross_entropy(out_logit, iden)
