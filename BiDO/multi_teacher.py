@@ -17,94 +17,57 @@ def load_my_state_dict(net, state_dict):
         # print(name, '---', old_name)
         net_state[name].copy_(old_param.data)
 
-
-def load_feature_extractor(net, state_dict):
-    print("load_pretrained_feature_extractor!!!")
-    net_state = net.state_dict()
-
-    new_state_dict = collections.OrderedDict()
-    for name, param in state_dict.items():
-        if "running_var" in name:
-            new_state_dict[name] = param
-            new_item = name.replace("running_var", "num_batches_tracked")
-            new_state_dict[new_item] = torch.tensor(0)
-        else:
-            new_state_dict[name] = param
-
-    for ((name, param), (new_name, mew_param)) in zip(net_state.items(), new_state_dict.items()):
-        if "classifier" in new_name:
-            break
-        if "num_batches_tracked" in new_name:
-            continue
-        # print(name, '---', new_name)
-        
-        net_state[name].copy_(mew_param.data)
-
-def distillation(student_scores, labels, teacher_scores):
-    # distillation loss + classification loss
-    # y: student
-    # labels: hard label
-    # teacher_scores: soft label
-    #teacher_scores = F.softmax(teacher_scores)
-    T = 2
-    return F.cross_entropy(student_scores,labels) + nn.KLDivLoss()(F.log_softmax(student_scores/T), F.softmax(teacher_scores/T)) * (T*T * 2.0 + 0.7)
-    #10* nn.MSELoss()(student_scores,teacher_scores)
-    #return nn.MSELoss()(y,teacher_scores)
-
-def mkd(student_scores, labels, vgg_output, hsic_output):
-    # distillation loss + classification loss
-    # y: student
-    # labels: hard label
-    # teacher_scores: soft label
-    #teacher_scores = F.softmax(teacher_scores)
-    T=64
-    return F.cross_entropy(student_scores,labels) +100* nn.MSELoss()(student_scores,hsic_output) +  nn.KLDivLoss()(F.log_softmax(student_scores/T), F.softmax(vgg_output/T)) * (T*T * 2.0 + 0.7)
-    #return nn.MSELoss()(y,teacher_scores)
-
 def KD(args, n_classes, trainloader, testloader):
     n_epochs = 100
     lr = 0.001
 
-    lossfns = [distillation]
-    for loss in lossfns:
-        criterion = loss
-        if model_name == "VGG16" or model_name == "reg":
-            net = model.VGG16_V(n_classes)
+    criterion = loss
+    
+    if model_name == "VGG16" or model_name == "reg":
+        net = model.VGG16_V(n_classes)
 
-        elif model_name == "ResNet":
-            net = model.ResNetCls(nclass=n_classes, resnetl=10)
-            # net = model.ResNet18(n_classes=n_classes)
+    elif model_name == "ResNet":
+        net = model.ResNetCls(nclass=n_classes, resnetl=10)
+        # net = model.ResNet18(n_classes=n_classes)
 
-        optimizer = torch.optim.Adam(net.parameters(), lr)
+    optimizer = torch.optim.Adam(net.parameters(), lr)
 
-        net = torch.nn.DataParallel(net).to(device)
-        #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.5)
-        if args.teacher=='VGG16':
-            teacher = model.VGG16_V(n_classes)
-            e_path = '../final_tars/eval/VGG16_79.23.tar'
-        elif args.teacher == 'HSIC':
-            teacher = model.VGG16(n_classes,True)
-            e_path = '../final_tars/BiDO_teacher_71.35_0.1_0.1.tar'
-        ckp_E = torch.load(e_path)
-        teacher.load_state_dict(ckp_E['state_dict'], strict=False)
-        teacher = teacher.cuda()
+    net = torch.nn.DataParallel(net).to(device)
 
-        best_ACC = -1
-        for epoch in range(n_epochs):
-            print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
-            train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
-            test_acc = engine.test(net, criterion, testloader)
-            print(test_acc)
-            if test_acc > best_ACC:
-                best_ACC = test_acc
-                best_model = deepcopy(net)
-            #scheduler.step()
+    vanilla_teacher = model.VGG16_V(1000)
+    e_path = '../final_tars/eval/VGG16_79.23.tar'
+    ckp_E = torch.load(e_path)
+    vanilla_teacher.load_state_dict(ckp_E['state_dict'], strict=False)
+    vanilla_teacher = vanilla_teacher.cuda()
+    
+    HSIC_teacher =model.VGG16(n_classes,True)
+    e_path = '../final_tars/BiDO_teacher_71.35_0.1_0.1.tar'
+    ckp_E = torch.load(e_path)
+    HSIC_teacher.load_state_dict(ckp_E['state_dict'], strict=False)
+    HSIC_teacher = HSIC_teacher.cuda()
 
-        print("best acc:", best_ACC)
-        
-        utils.save_checkpoint({
-            'state_dict': best_model.state_dict(),
-            }, '../final_tars', "student-BiDO_{:.2f}.tar".format(best_ACC))
+    best_ACC = -1
+    for epoch in range(n_epochs):
+        print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, n_epochs, optimizer.param_groups[0]['lr']))
+        pbar = tqdm(enumerate(trainloader), total=len(trainloader), ncols=10)
+        for batch_idx, (inputs, iden) in pbar:
+            inputs, iden = inputs.to(device), iden.to(device)
+            iden = iden.view(-1)
+            feats, out_logit = model(inputs)
+            _, vt_output = vanilla_teacher(inputs)
+        #train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
+        test_acc = engine.test(net, criterion, testloader)
+        print(test_acc)
+        if test_acc > best_ACC:
+            best_ACC = test_acc
+            best_model = deepcopy(net)
+        #scheduler.step()
+
+    print("best acc:", best_ACC)
+    
+    utils.save_checkpoint({
+        'state_dict': best_model.state_dict(),
+        }, '../final_tars', "student-BiDO_{:.2f}.tar".format(best_ACC))
 
 
         
@@ -159,11 +122,4 @@ if __name__ == '__main__':
     test_loader = torch.utils.data.DataLoader(test_images, batch_size = 64 ,num_workers=4,shuffle=True) 
  
 
-    if args.defense == 'HSIC':
-        HSIC(args, train_loader, test_loader)
-    if args.defense == 'VIB':
-        VIB(args, train_loader , test_loader)
-    if args.defense=='NODEF':
-        NODEF(args, 1000, train_loader,test_loader)
-    if args.defense=='KD':
-        KD(args, args.nclass, train_loader, test_loader)
+    
