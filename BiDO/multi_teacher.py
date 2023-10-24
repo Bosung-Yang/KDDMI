@@ -21,7 +21,6 @@ def KD(args, n_classes, trainloader, testloader):
     n_epochs = 100
     lr = 0.001
 
-    criterion = loss
     
     if model_name == "VGG16" or model_name == "reg":
         net = model.VGG16_V(n_classes)
