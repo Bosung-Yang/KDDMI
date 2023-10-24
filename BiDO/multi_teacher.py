@@ -9,6 +9,7 @@ import model
 from util import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
 device = "cuda"
 import torch.nn.functional as F
+from tqdm import tqdm
 
 def load_my_state_dict(net, state_dict):
     print("load nature model!!!")
