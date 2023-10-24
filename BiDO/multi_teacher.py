@@ -59,9 +59,9 @@ def KD(args, n_classes, trainloader, testloader):
             cls_loss = F.cross_entropy(out_logit, iden)
             print(out_logit)
             print(vt_output)
-            vt_loss = nn.KLDivLoss(out_logit, vt_output)
-            #vt_loss = nn.MSELoss(out_logit, vt_output)
-            ht_loss = nn.KLDivLoss(out_logit, ht_output)
+            #vt_loss = nn.KLDivLoss(out_logit, vt_output)
+            vt_loss = nn.MSELoss(out_logit, vt_output)
+            ht_loss = nn.MSELoss(out_logit, ht_output)
             loss = cls_loss + 0.1 * vt_loss + 0.1 * ht_loss
             loss.backward()
             optimizer.step()
