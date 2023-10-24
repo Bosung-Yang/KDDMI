@@ -55,8 +55,15 @@ def KD(args, n_classes, trainloader, testloader):
             iden = iden.view(-1)
             feats, out_logit = model(inputs)
             _, vt_output = vanilla_teacher(inputs)
+            _, ht_output = HSIC_teacher(inputs)
+            cls_loss = F.cross_entropy(out_logit, iden)
+            vt_loss = nn.MSELoss(out_logit, vt_output)
+            ht_loss = nn.MSELoss(out_logit, ht_output)
+            loss = cls_loss + 0.1 * vt_loss + 0.1 * ht_loss
+            loss.backward()
+            optimizer.step()
         #train_loss, train_acc = engine.train_kd(net,teacher, criterion, optimizer, trainloader)
-        test_acc = engine.test(net, criterion, testloader)
+        test_acc = engine.test(net, F.cross_entropy, testloader)
         print(test_acc)
         if test_acc > best_ACC:
             best_ACC = test_acc
