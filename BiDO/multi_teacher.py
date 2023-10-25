@@ -79,7 +79,7 @@ def KD(args, n_classes, trainloader, testloader):
     
     utils.save_checkpoint({
         'state_dict': best_model.state_dict(),
-        }, '../final_tars', "student-BiDO_{:.2f}.tar".format(best_ACC))
+        }, '../final_tars', "multiteacher_{:.2f}.tar".format(best_ACC))
 
 
         
