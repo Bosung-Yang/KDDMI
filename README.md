@@ -39,6 +39,9 @@ For DGMI, the target model should have nonlinear activation in the output layer.
 python attack_dgmi.py --model=vgg16_softmax --path=./model.pth --exp=gmi --num_class=2000
 ```
 
+## To Do
+paper search / exp 
+
 ## Reference
 <https://github.com/SCccc21/Knowledge-Enriched-DMI>   
 <https://github.com/MKariya1998/GMI-Attack>
